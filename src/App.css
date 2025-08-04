@@ -1,0 +1,19 @@
+.App {
+  text-align: center;
+}
+
+.App-header {
+  background-color: #DA5812;
+  padding: 20px;
+  color: white;
+}
+
+.App-header h1 {
+  margin: 0;
+  font-family: 'Julius Sans One', sans-serif;
+}
+
+.App-header p {
+  margin: 10px 0 0 0;
+  font-family: 'Antic Didone', serif;
+} 
