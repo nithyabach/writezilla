@@ -17,49 +17,29 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@aws-amplify/ui-react": "^6.0.0",
-    "aws-amplify": "^6.15.4",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^6.8.0",
-    "react-scripts": "5.0.1",
-    "typescript": "^4.9.0",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
-    "@mui/material": "^5.11.0",
-    "@mui/icons-material": "^5.11.0",
-    "@emotion/react": "^11.10.0",
-    "@emotion/styled": "^11.10.0",
-    "draft-js": "^0.11.7",
-    "@types/draft-js": "^0.11.0",
-    "react-draft-wysiwyg": "^1.15.0",
-    "draftjs-to-html": "^0.9.1",
-    "html-to-draftjs": "^1.5.0",
-    "react-beautiful-dnd": "^13.1.1",
-    "@types/react-beautiful-dnd": "^13.1.4",
-    "react-dropzone": "^14.2.3",
-    "react-query": "^3.39.0",
-    "zustand": "^4.3.0",
-    "date-fns": "^2.29.0",
-    "lodash": "^4.17.21",
-    "@types/lodash": "^4.14.191"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1",
+    "typescript": "^4.9.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^14.4.3",
     "@types/jest": "^29.5.0",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
     "cypress": "^12.0.0",
     "eslint": "^8.35.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-react": "^7.32.0",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "@typescript-eslint/eslint-plugin": "^5.54.0",
-    "@typescript-eslint/parser": "^5.54.0",
-    "prettier": "^2.8.0",
     "jest": "^29.5.0",
-    "jest-environment-jsdom": "^29.5.0"
+    "jest-environment-jsdom": "^29.5.0",
+    "prettier": "^2.8.0"
   },
   "browserslist": {
     "production": [
@@ -93,4 +73,4 @@
     "url": "https://github.com/yourusername/writezilla/issues"
   },
   "homepage": "https://github.com/yourusername/writezilla#readme"
-} 
+}
