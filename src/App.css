@@ -3,17 +3,17 @@
 }
 
 .App-header {
-  background-color: #DA5812;
+  background-color: var(--color-dark-orange);
   padding: 20px;
   color: white;
 }
 
 .App-header h1 {
   margin: 0;
-  font-family: 'Julius Sans One', sans-serif;
+  font-family: var(--font-logo);
 }
 
 .App-header p {
   margin: 10px 0 0 0;
-  font-family: 'Antic Didone', serif;
+  font-family: var(--font-body);
 } 

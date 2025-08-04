@@ -1,0 +1,93 @@
+/* Writezilla Design System Variables */
+
+/* Typography */
+:root {
+  /* Font Families */
+  --font-logo: 'Julius Sans One', sans-serif;
+  --font-header: 'Antic Didone', serif;
+  --font-body: 'Antic Didone', serif;
+  
+  /* Font Sizes */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+  
+  /* Font Weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  /* Line Heights */
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+}
+
+/* Colors */
+:root {
+  /* Primary Colors */
+  --color-dark-orange: #DA5812;
+  --color-light-orange: rgba(218, 88, 18, 0.74); /* 74% transparency */
+  --color-light-grey: #E3E0DD;
+  --color-white: #E8E8E8;
+  
+  /* Semantic Colors */
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --color-info: #3B82F6;
+  
+  /* Text Colors */
+  --color-text-primary: #1F2937;
+  --color-text-secondary: #6B7280;
+  --color-text-muted: #9CA3AF;
+  
+  /* Background Colors */
+  --color-bg-primary: #FFFFFF;
+  --color-bg-secondary: #F9FAFB;
+  --color-bg-tertiary: #F3F4F6;
+}
+
+/* Typography Utility Classes */
+.font-logo {
+  font-family: var(--font-logo);
+}
+
+.font-header {
+  font-family: var(--font-header);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+/* Color Utility Classes */
+.text-dark-orange {
+  color: var(--color-dark-orange);
+}
+
+.text-light-orange {
+  color: var(--color-light-orange);
+}
+
+.text-light-grey {
+  color: var(--color-light-grey);
+}
+
+.bg-dark-orange {
+  background-color: var(--color-dark-orange);
+}
+
+.bg-light-orange {
+  background-color: var(--color-light-orange);
+}
+
+.bg-light-grey {
+  background-color: var(--color-light-grey);
+} 
