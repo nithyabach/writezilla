@@ -1,0 +1,20 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-writezilla-dev-1f11d-authRole",
+      "UnauthRoleArn": "arn:aws:iam::665290616118:role/amplify-writezilla-dev-1f11d-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::665290616118:role/amplify-writezilla-dev-1f11d-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-writezilla-dev-1f11d-deployment",
+      "UnauthRoleName": "amplify-writezilla-dev-1f11d-unauthRole",
+      "StackName": "amplify-writezilla-dev-1f11d",
+      "StackId": "arn:aws:cloudformation:us-east-1:665290616118:stack/amplify-writezilla-dev-1f11d/03462f80-7dfb-11f0-8fe1-0affeb63cf45",
+      "AmplifyAppId": "d30ivecsw5uff0"
+    },
+    "categories": {
+      "auth": {
+        "writezilla2e92aa4a": {}
+      }
+    }
+  }
+}
