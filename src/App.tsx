@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import GoogleAuth from './components/auth/GoogleAuth';
+import GoogleAuth from './components/auth/FirebaseGoogleAuth';
 import { useAuth } from './hooks/useAuth';
 import UserDashboard from './components/UserDashboard';
 import './components/UserDashboard.css';
@@ -29,6 +29,7 @@ function App() {
   const [pendingEmail, setPendingEmail] = useState('');
   const [pendingPassword, setPendingPassword] = useState('');
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [googleUser, setGoogleUser] = useState<any>(null);
 
   // Check authentication status on component mount
   useEffect(() => {
@@ -45,6 +46,28 @@ function App() {
       // User is not authenticated
       setCurrentUser(null);
     }
+  };
+
+  // Handle Google sign-in
+  const handleGoogleSignIn = (user: any) => {
+    setGoogleUser(user);
+    setCurrentUser(user); // Set as current user to show dashboard
+  };
+
+  // Handle Google sign-out
+  const handleGoogleSignOut = () => {
+    setGoogleUser(null);
+    setCurrentUser(null);
+  };
+
+  // Handle sign-out from UserDashboard
+  const handleSignOut = () => {
+    console.log('App.tsx handleSignOut called');
+    setCurrentUser(null);
+    setGoogleUser(null);
+    setAuthError('');
+    setAuthSuccess('');
+    console.log('App.tsx state cleared');
   };
 
   const handleTabClick = (tab: 'signin' | 'signup') => {
@@ -258,7 +281,7 @@ function App() {
 
   // If user is authenticated, show the dashboard
   if (currentUser) {
-    return <UserDashboard />;
+    return <UserDashboard onSignOut={handleSignOut} />;
   }
 
   return (
@@ -365,11 +388,14 @@ function App() {
                       <span>OR</span>
                     </div>
 
-                    <div className="social-login">
-                      <GoogleAuth />
-                    </div>
-                  </form>
-                ) : (
+                                                 <div className="social-login">
+                               <GoogleAuth 
+                                 onGoogleSignIn={handleGoogleSignIn}
+                                 onGoogleSignOut={handleGoogleSignOut}
+                               />
+                             </div>
+                           </form>
+                         ) : (
                   <form className="auth-form" onSubmit={handleSignupSubmit}>
                     {/* Error and Success Messages */}
                     {authError && (
@@ -446,11 +472,14 @@ function App() {
                       <span>OR</span>
                     </div>
 
-                    <div className="social-login">
-                      <GoogleAuth />
-                    </div>
-                  </form>
-                )}
+                                                 <div className="social-login">
+                               <GoogleAuth 
+                                 onGoogleSignIn={handleGoogleSignIn}
+                                 onGoogleSignOut={handleGoogleSignOut}
+                               />
+                             </div>
+                           </form>
+                         )}
 
                 {/* Email Verification Popup */}
                 {showVerification && (

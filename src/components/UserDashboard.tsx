@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getCurrentUser, signOut } from 'aws-amplify/auth';
+import { getAuth, signOut as firebaseSignOut } from 'firebase/auth';
 
 interface User {
   username: string;
@@ -9,7 +10,11 @@ interface User {
   };
 }
 
-const UserDashboard: React.FC = () => {
+interface UserDashboardProps {
+  onSignOut?: () => void;
+}
+
+const UserDashboard: React.FC<UserDashboardProps> = ({ onSignOut }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -29,10 +34,32 @@ const UserDashboard: React.FC = () => {
   };
 
   const handleSignOut = async () => {
+    console.log('Sign out button clicked');
     try {
+      // Sign out from AWS Cognito
+      console.log('Signing out from AWS Cognito...');
       await signOut();
-      // Redirect to home page or trigger auth state change
-      window.location.reload();
+      console.log('AWS Cognito sign out successful');
+      
+      // Also sign out from Firebase if it's configured
+      try {
+        const auth = getAuth();
+        if (auth) {
+          console.log('Signing out from Firebase...');
+          await firebaseSignOut(auth);
+          console.log('Firebase sign out successful');
+        }
+      } catch (firebaseError) {
+        console.log('Firebase not configured or already signed out');
+      }
+      
+      // Clear user state and notify parent component
+      console.log('Clearing user state and calling onSignOut...');
+      setUser(null);
+      if (onSignOut) {
+        onSignOut();
+      }
+      console.log('Sign out process completed');
     } catch (error) {
       console.error('Error signing out:', error);
     }

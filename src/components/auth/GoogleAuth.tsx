@@ -1,34 +1,44 @@
-import React from 'react';
-import { useAuth } from '../../hooks/useAuth';
+import React, { useState } from 'react';
+import { signInWithRedirect, signOut, getCurrentUser } from 'aws-amplify/auth';
 import './GoogleAuth.css';
 
 const GoogleAuth: React.FC = () => {
-  const {
-    user,
-    isLoading,
-    isAuthenticated,
-    error,
-    login,
-    logout,
-    userDisplayName,
-    userAvatar,
-    clearError,
-  } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string>('');
 
-  const handleLogin = async () => {
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    setError('');
+    
     try {
-      await login();
+      // Sign in with Google using AWS Amplify's federated sign-in
+      await signInWithRedirect({
+        provider: 'Google'
+      });
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Google sign-in error:', error);
+      setError('Failed to sign in with Google. Please try again.');
+      setIsLoading(false);
     }
   };
 
-  const handleLogout = async () => {
+  const handleSignOut = async () => {
+    setIsLoading(true);
+    setError('');
+    
     try {
-      await logout();
+      await signOut();
+      // Redirect to home page after sign out
+      window.location.href = '/';
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('Sign out error:', error);
+      setError('Failed to sign out. Please try again.');
+      setIsLoading(false);
     }
+  };
+
+  const clearError = () => {
+    setError('');
   };
 
   if (isLoading) {
@@ -36,28 +46,6 @@ const GoogleAuth: React.FC = () => {
       <div className="auth-loading">
         <div className="loading-spinner"></div>
         <span>Loading...</span>
-      </div>
-    );
-  }
-
-  if (isAuthenticated && user) {
-    return (
-      <div className="user-profile">
-        <div className="user-info">
-          <img 
-            src={userAvatar} 
-            alt="User avatar" 
-            className="user-avatar"
-          />
-          <span className="user-name">{userDisplayName}</span>
-        </div>
-        <button 
-          onClick={handleLogout}
-          className="logout-btn"
-          aria-label="Logout"
-        >
-          Logout
-        </button>
       </div>
     );
   }
@@ -72,9 +60,9 @@ const GoogleAuth: React.FC = () => {
       )}
       
       <button 
-        onClick={handleLogin}
+        onClick={handleGoogleSignIn}
         className="google-login-btn"
-        aria-label="Login with Google"
+        aria-label="Sign in with Google"
         disabled={isLoading}
       >
         <svg className="google-icon" viewBox="0 0 24 24">
@@ -83,7 +71,7 @@ const GoogleAuth: React.FC = () => {
           <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
           <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
         </svg>
-        <span>Login with Google</span>
+        <span>Sign in with Google</span>
       </button>
     </div>
   );
