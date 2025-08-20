@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import GoogleAuth from './components/auth/GoogleAuth';
 import { useAuth } from './hooks/useAuth';
+import UserDashboard from './components/UserDashboard';
+import './components/UserDashboard.css';
 import { signUp, signIn, signOut, getCurrentUser, confirmSignUp, resendSignUpCode } from 'aws-amplify/auth';
 
 function App() {
@@ -25,6 +27,25 @@ function App() {
   const [showVerification, setShowVerification] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
   const [pendingEmail, setPendingEmail] = useState('');
+  const [pendingPassword, setPendingPassword] = useState('');
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  // Check authentication status on component mount
+  useEffect(() => {
+    checkAuthStatus();
+  }, []);
+
+  const checkAuthStatus = async () => {
+    try {
+      const user = await getCurrentUser();
+      setCurrentUser(user);
+      // Update the useAuth hook's authentication state
+      // This will be handled by the UserDashboard component
+    } catch (error) {
+      // User is not authenticated
+      setCurrentUser(null);
+    }
+  };
 
   const handleTabClick = (tab: 'signin' | 'signup') => {
     setActiveTab(tab);
@@ -71,6 +92,7 @@ function App() {
       
       setAuthSuccess(`Account created successfully! Please check your email (${signupForm.email}) for the verification code.`);
       setPendingEmail(signupForm.email);
+      setPendingPassword(signupForm.password);
       setShowVerification(true);
       setSignupForm({ email: '', password: '', confirmPassword: '' });
       
@@ -105,6 +127,7 @@ function App() {
       });
       
       setAuthSuccess('Sign in successful!');
+      setCurrentUser(result);
       setSigninForm({ email: '', password: '' });
       
       // Clear success message after a moment
@@ -173,16 +196,33 @@ function App() {
         confirmationCode: verificationCode
       });
       
-      setAuthSuccess('Email verified successfully! You can now sign in.');
-      setShowVerification(false);
-      setVerificationCode('');
-      setPendingEmail('');
+      setAuthSuccess('Email verified successfully! Signing you in...');
       
-      // Switch to signin tab after successful verification
-      setTimeout(() => {
-        setActiveTab('signin');
+      // Automatically sign in the user after verification
+      try {
+        const signInResult = await signIn({ 
+          username: pendingEmail, 
+          password: pendingPassword
+        });
+        
+        setCurrentUser(signInResult);
+        setShowVerification(false);
+        setVerificationCode('');
+        setPendingEmail('');
         setAuthSuccess('');
-      }, 2000);
+        
+      } catch (signInError) {
+        // If auto sign-in fails, show message to sign in manually
+        setAuthSuccess('Email verified successfully! Please sign in with your credentials.');
+        setShowVerification(false);
+        setVerificationCode('');
+        setPendingEmail('');
+        
+        setTimeout(() => {
+          setActiveTab('signin');
+          setAuthSuccess('');
+        }, 3000);
+      }
       
     } catch (error) {
       console.error('Verification error:', error);
@@ -216,6 +256,11 @@ function App() {
     }
   };
 
+  // If user is authenticated, show the dashboard
+  if (currentUser) {
+    return <UserDashboard />;
+  }
+
   return (
     <div className="App">
       {/* Header */}
@@ -232,58 +277,9 @@ function App() {
       {/* Main Content - Split Layout */}
       <main className="main-split-layout">
         {/* Left Panel - Content */}
-        <div className="content-panel">
+                <div className="content-panel">
           <div className="content-container">
-            {isAuthenticated ? (
-              <div className="dashboard-content">
-                <div className="welcome-section">
-                  <h2 className="welcome-title">Welcome Back, {user?.name}!</h2>
-                  <p className="welcome-subtitle">Ready to create something amazing today?</p>
-                </div>
-                
-                <div className="action-cards">
-                  <div className="action-card primary">
-                    <div className="card-icon">Create</div>
-                    <h3>Create New Story</h3>
-                    <p>Start writing your next masterpiece</p>
-                  </div>
-                  <div className="action-card secondary">
-                    <div className="card-icon">Stories</div>
-                    <h3>My Stories</h3>
-                    <p>Continue where you left off</p>
-                  </div>
-                  <div className="action-card secondary">
-                    <div className="card-icon">Mood</div>
-                    <h3>Moodboards</h3>
-                    <p>Get inspired with visuals</p>
-                  </div>
-                  <div className="action-card secondary">
-                    <div className="card-icon">Music</div>
-                    <h3>Playlists</h3>
-                    <p>Set the perfect writing mood</p>
-                  </div>
-                </div>
-
-                <div className="stats-section">
-                  <h3>Your Writing Journey</h3>
-                  <div className="stats-grid">
-                    <div className="stat-item">
-                      <span className="stat-number">0</span>
-                      <span className="stat-label">Stories</span>
-                    </div>
-                    <div className="stat-item">
-                      <span className="stat-number">0</span>
-                      <span className="stat-label">Words</span>
-                    </div>
-                    <div className="stat-item">
-                      <span className="stat-number">0</span>
-                      <span className="stat-label">Days</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="landing-content">
+            <div className="landing-content">
                 <div className="brand-section">
                   <div className="brand-logo">
                     <h1 className="brand-title">Writezilla</h1>
@@ -456,73 +452,78 @@ function App() {
                   </form>
                 )}
 
-                {/* Email Verification Form */}
+                {/* Email Verification Popup */}
                 {showVerification && (
-                  <form className="auth-form" onSubmit={handleVerificationSubmit}>
-                    <div className="verification-header">
-                      <h3>Verify Your Email</h3>
-                      <p>We sent a verification code to <strong>{pendingEmail}</strong></p>
-                    </div>
+                  <div className="verification-overlay">
+                    <div className="verification-popup">
+                      <div className="verification-content">
+                        <h2 className="verification-title">Verify your email address</h2>
+                        <p className="verification-instruction">To verify your email address, enter this code in your browser.</p>
+                        
+                        {/* Error and Success Messages */}
+                        {authError && (
+                          <div className="auth-error">
+                            {authError}
+                          </div>
+                        )}
+                        {authSuccess && (
+                          <div className="auth-success">
+                            {authSuccess}
+                          </div>
+                        )}
 
-                    {/* Error and Success Messages */}
-                    {authError && (
-                      <div className="auth-error">
-                        {authError}
+                        <form onSubmit={handleVerificationSubmit}>
+                          <div className="verification-code-input">
+                            <input 
+                              type="text" 
+                              placeholder="Enter 6-digit code" 
+                              className="verification-input"
+                              value={verificationCode}
+                              onChange={(e) => setVerificationCode(e.target.value)}
+                              maxLength={6}
+                              required
+                            />
+                          </div>
+
+                          <button type="submit" className="verify-btn" disabled={isLoading}>
+                            {isLoading ? 'Verifying...' : 'Verify'}
+                          </button>
+                        </form>
+
+                        <div className="verification-help">
+                          <p>If you didn't request a code, you can safely ignore this email.</p>
+                          <div className="verification-actions">
+                            <button 
+                              type="button" 
+                              className="resend-code-btn"
+                              onClick={handleResendCode}
+                              disabled={isLoading}
+                            >
+                              Resend Code
+                            </button>
+                            <button 
+                              type="button" 
+                              className="close-popup-btn"
+                              onClick={() => {
+                                setShowVerification(false);
+                                setVerificationCode('');
+                                setPendingEmail('');
+                                setAuthError('');
+                                setAuthSuccess('');
+                              }}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                          <p className="help-text">
+                            Questions? <a href="#help" className="help-link">We're here to help.</a>
+                          </p>
+                        </div>
                       </div>
-                    )}
-                    {authSuccess && (
-                      <div className="auth-success">
-                        {authSuccess}
-                      </div>
-                    )}
-
-                    <div className="input-group">
-                      <input 
-                        type="text" 
-                        placeholder="Enter verification code" 
-                        className="form-input"
-                        value={verificationCode}
-                        onChange={(e) => setVerificationCode(e.target.value)}
-                        maxLength={6}
-                        required
-                      />
-                      <span className="input-icon">Code</span>
                     </div>
-
-                    <button type="submit" className="login-btn primary" disabled={isLoading}>
-                      {isLoading ? 'Verifying...' : 'Verify Email'}
-                    </button>
-
-                    <div className="verification-footer">
-                      <p>Didn't receive the code? Check your spam folder or contact support.</p>
-                      <div className="verification-actions">
-                        <button 
-                          type="button" 
-                          className="resend-code"
-                          onClick={handleResendCode}
-                          disabled={isLoading}
-                        >
-                          Resend Code
-                        </button>
-                        <button 
-                          type="button" 
-                          className="back-to-signup"
-                          onClick={() => {
-                            setShowVerification(false);
-                            setVerificationCode('');
-                            setPendingEmail('');
-                            setAuthError('');
-                            setAuthSuccess('');
-                          }}
-                        >
-                          Back to Sign Up
-                        </button>
-                      </div>
-                    </div>
-                  </form>
+                  </div>
                 )}
               </div>
-            )}
           </div>
         </div>
 
