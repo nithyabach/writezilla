@@ -1,10 +1,56 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './App.css';
 import GoogleAuth from './components/auth/GoogleAuth';
 import { useAuth } from './hooks/useAuth';
 
 function App() {
   const { isAuthenticated, user } = useAuth();
+  const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
+  const [signupForm, setSignupForm] = useState({
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
+  const [showSigninPassword, setShowSigninPassword] = useState(false);
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const handleTabClick = (tab: 'signin' | 'signup') => {
+    setActiveTab(tab);
+  };
+
+  const handleSignupInputChange = (field: string, value: string) => {
+    setSignupForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleSignupSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // TODO: Implement actual signup logic
+    console.log('Signup form submitted:', signupForm);
+  };
+
+  const handleSigninSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // TODO: Implement actual signin logic
+    console.log('Signin form submitted');
+  };
+
+  const togglePasswordVisibility = (field: 'signin' | 'signup' | 'confirm') => {
+    switch (field) {
+      case 'signin':
+        setShowSigninPassword(!showSigninPassword);
+        break;
+      case 'signup':
+        setShowSignupPassword(!showSignupPassword);
+        break;
+      case 'confirm':
+        setShowConfirmPassword(!showConfirmPassword);
+        break;
+    }
+  };
 
   return (
     <div className="App">
@@ -82,48 +128,138 @@ function App() {
                 </div>
 
                 <div className="auth-tabs">
-                  <button className="auth-tab active">Sign In</button>
-                  <button className="auth-tab">Sign Up</button>
+                  <button 
+                    className={`auth-tab ${activeTab === 'signin' ? 'active' : ''}`}
+                    onClick={() => handleTabClick('signin')}
+                  >
+                    Sign In
+                  </button>
+                  <button 
+                    className={`auth-tab ${activeTab === 'signup' ? 'active' : ''}`}
+                    onClick={() => handleTabClick('signup')}
+                  >
+                    Sign Up
+                  </button>
                 </div>
 
-                <div className="auth-form">
-                  <div className="input-group">
-                    <input 
-                      type="email" 
-                      placeholder="Enter your email" 
-                      className="form-input"
-                    />
-                    <span className="input-icon">Email</span>
-                  </div>
-                  
-                  <div className="input-group">
-                    <input 
-                      type="password" 
-                      placeholder="Enter your password" 
-                      className="form-input"
-                    />
-                    <span className="input-icon">Password</span>
-                  </div>
+                {activeTab === 'signin' ? (
+                  <form className="auth-form" onSubmit={handleSigninSubmit}>
+                    <div className="input-group">
+                      <input 
+                        type="email" 
+                        placeholder="Enter your email" 
+                        className="form-input"
+                        required
+                      />
+                      <span className="input-icon">Email</span>
+                    </div>
+                    
+                    <div className="input-group">
+                      <input 
+                        type={showSigninPassword ? "text" : "password"}
+                        placeholder="Enter your password" 
+                        className="form-input"
+                        required
+                      />
+                      <button 
+                        type="button"
+                        className="password-toggle"
+                        onClick={() => togglePasswordVisibility('signin')}
+                      >
+                        <span className="material-icons">
+                          {showSigninPassword ? 'visibility_off' : 'visibility'}
+                        </span>
+                      </button>
+                    </div>
 
-                  <div className="form-options">
-                    <label className="checkbox-label">
-                      <input type="checkbox" defaultChecked />
-                      <span className="checkmark"></span>
-                      Remember me
-                    </label>
-                    <a href="#forgot" className="forgot-link">Forgot Password?</a>
-                  </div>
+                    <div className="form-options">
+                      <label className="checkbox-label">
+                        <input type="checkbox" defaultChecked />
+                        <span className="checkmark"></span>
+                        Remember me
+                      </label>
+                      <a href="#forgot" className="forgot-link">Forgot Password?</a>
+                    </div>
 
-                  <button className="login-btn primary">Login</button>
+                    <button type="submit" className="login-btn primary">Login</button>
 
-                  <div className="divider">
-                    <span>OR</span>
-                  </div>
+                    <div className="divider">
+                      <span>OR</span>
+                    </div>
 
-                  <div className="social-login">
-                    <GoogleAuth />
-                  </div>
-                </div>
+                    <div className="social-login">
+                      <GoogleAuth />
+                    </div>
+                  </form>
+                ) : (
+                  <form className="auth-form" onSubmit={handleSignupSubmit}>
+                    <div className="input-group">
+                      <input 
+                        type="email" 
+                        placeholder="Enter your email" 
+                        className="form-input"
+                        value={signupForm.email}
+                        onChange={(e) => handleSignupInputChange('email', e.target.value)}
+                        required
+                      />
+                      <span className="input-icon">Email</span>
+                    </div>
+                    
+                    <div className="input-group">
+                      <input 
+                        type={showSignupPassword ? "text" : "password"}
+                        placeholder="Create password" 
+                        className="form-input"
+                        value={signupForm.password}
+                        onChange={(e) => handleSignupInputChange('password', e.target.value)}
+                        required
+                      />
+                      <button 
+                        type="button"
+                        className="password-toggle"
+                        onClick={() => togglePasswordVisibility('signup')}
+                      >
+                        <span className="material-icons">
+                          {showSignupPassword ? 'visibility_off' : 'visibility'}
+                        </span>
+                      </button>
+                    </div>
+
+                    <div className="input-group">
+                      <input 
+                        type={showConfirmPassword ? "text" : "password"}
+                        placeholder="Confirm password" 
+                        className="form-input"
+                        value={signupForm.confirmPassword}
+                        onChange={(e) => handleSignupInputChange('confirmPassword', e.target.value)}
+                        required
+                      />
+                      <button 
+                        type="button"
+                        className="password-toggle"
+                        onClick={() => togglePasswordVisibility('confirm')}
+                      >
+                        <span className="material-icons">
+                          {showConfirmPassword ? 'visibility_off' : 'visibility'}
+                        </span>
+                      </button>
+                    </div>
+
+                    <div className="password-requirements">
+                      <p>Password must contain at least 8 characters, including uppercase, lowercase, numbers, and special characters.</p>
+                    </div>
+
+                    <button type="submit" className="login-btn primary">Create Account</button>
+
+                    <div className="divider">
+                      <span>OR</span>
+                    </div>
+
+                    <div className="social-login">
+                      <GoogleAuth />
+                    </div>
+                  </form>
+                )}
               </div>
             )}
           </div>
