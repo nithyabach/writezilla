@@ -9,78 +9,34 @@ function App() {
         <div className="header-content">
           <h1 className="logo">WRITEZILLA</h1>
           <nav className="navigation">
-            <a href="#stories">Stories</a>
-            <a href="#graphics">Graphics</a>
-            <a href="#notes">Notes</a>
-            <a href="#playlists">Playlists</a>
+            <a href="#about">About</a>
+            <a href="#features">Features</a>
+            <a href="#contact">Contact</a>
           </nav>
-          <div className="user-profile">
-            <div className="profile-icon">👤</div>
-          </div>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="main-content">
-        {/* Welcome Section */}
-        <section className="welcome-section">
-          <h2 className="welcome-title">WHAT WILL YOU CREATE TODAY?</h2>
-          <div className="action-buttons">
-            <button className="action-button">Stories and Novels</button>
-            <button className="action-button">Maps</button>
-            <button className="action-button">Moodboards</button>
-            <button className="action-button">Playlists</button>
+        <div className="hello-world-section">
+          <h2 className="hello-title">Hello World!</h2>
+          <p className="hello-subtitle">Welcome to Writezilla</p>
+          <p className="hello-description">
+            Your creative writing companion for stories, novels, and inspiration.
+          </p>
+          <div className="cta-buttons">
+            <button className="cta-button primary">Get Started</button>
+            <button className="cta-button secondary">Learn More</button>
           </div>
-          <div className="search-container">
-            <div className="search-bar">
-              <span className="search-icon">🔍</span>
-              <input 
-                type="text" 
-                placeholder="AI enhanced search" 
-                className="search-input"
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* Stories Section */}
-        <section className="content-section">
-          <h3 className="section-title">WRITING:</h3>
-          <div className="card-grid">
-            <div className="story-card">
-              <div className="card-image story-1"></div>
-              <h4 className="card-title">The Tom & Jerry Tale</h4>
-            </div>
-            <div className="story-card">
-              <div className="card-image story-2"></div>
-              <h4 className="card-title">Adventures of a Foodie</h4>
-            </div>
-            <div className="story-card">
-              <div className="card-image story-3"></div>
-              <h4 className="card-title">Ruby</h4>
-            </div>
-          </div>
-        </section>
-
-        {/* Maps Section */}
-        <section className="content-section">
-          <h3 className="section-title">MAPS:</h3>
-          <div className="card-grid">
-            <div className="story-card">
-              <div className="card-image map-1"></div>
-              <h4 className="card-title">Great Lake of Amerthyst</h4>
-            </div>
-            <div className="story-card">
-              <div className="card-image map-2"></div>
-              <h4 className="card-title">Road to the Neverwaters</h4>
-            </div>
-            <div className="story-card">
-              <div className="card-image map-3"></div>
-              <h4 className="card-title">Pixie Hollow's Winterland</h4>
-            </div>
-          </div>
-        </section>
+        </div>
       </main>
+
+      {/* Footer */}
+      <footer className="footer">
+        <div className="footer-content">
+          <p>&copy; 2024 Writezilla. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 }
