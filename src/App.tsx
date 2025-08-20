@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import './App.css';
 import GoogleAuth from './components/auth/GoogleAuth';
 import { useAuth } from './hooks/useAuth';
+import { signUp, signIn, signOut, getCurrentUser, confirmSignUp, resendSignUpCode } from 'aws-amplify/auth';
 
 function App() {
   const { isAuthenticated, user } = useAuth();
@@ -11,9 +12,19 @@ function App() {
     password: '',
     confirmPassword: ''
   });
+  const [signinForm, setSigninForm] = useState({
+    email: '',
+    password: ''
+  });
   const [showSigninPassword, setShowSigninPassword] = useState(false);
   const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [authError, setAuthError] = useState<string>('');
+  const [authSuccess, setAuthSuccess] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [showVerification, setShowVerification] = useState(false);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [pendingEmail, setPendingEmail] = useState('');
 
   const handleTabClick = (tab: 'signin' | 'signup') => {
     setActiveTab(tab);
@@ -26,16 +37,169 @@ function App() {
     }));
   };
 
-  const handleSignupSubmit = (e: React.FormEvent) => {
+  const handleSignupSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement actual signup logic
-    console.log('Signup form submitted:', signupForm);
+    setAuthError('');
+    setAuthSuccess('');
+    setIsLoading(true);
+
+    // Validate passwords match
+    if (signupForm.password !== signupForm.confirmPassword) {
+      setAuthError('Passwords do not match');
+      setIsLoading(false);
+      return;
+    }
+
+    // Validate password requirements
+    if (signupForm.password.length < 8) {
+      setAuthError('Password must be at least 8 characters long');
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const result = await signUp({
+        username: signupForm.email,
+        password: signupForm.password,
+        options: {
+          userAttributes: {
+            email: signupForm.email,
+            name: signupForm.email.split('@')[0] // Use email prefix as name
+          }
+        }
+      });
+      
+      setAuthSuccess(`Account created successfully! Please check your email (${signupForm.email}) for the verification code.`);
+      setPendingEmail(signupForm.email);
+      setShowVerification(true);
+      setSignupForm({ email: '', password: '', confirmPassword: '' });
+      
+    } catch (error) {
+      console.error('Signup error:', error);
+      if (error instanceof Error) {
+        if (error.message.includes('User already exists')) {
+          setAuthError('An account with this email already exists. Please sign in instead.');
+        } else if (error.message.includes('Password')) {
+          setAuthError('Password must be at least 8 characters and contain uppercase, lowercase, numbers, and special characters.');
+        } else {
+          setAuthError(error.message);
+        }
+      } else {
+        setAuthError('An error occurred during signup. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleSigninSubmit = (e: React.FormEvent) => {
+  const handleSigninSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement actual signin logic
-    console.log('Signin form submitted');
+    setAuthError('');
+    setAuthSuccess('');
+    setIsLoading(true);
+
+    try {
+      const result = await signIn({ 
+        username: signinForm.email, 
+        password: signinForm.password 
+      });
+      
+      setAuthSuccess('Sign in successful!');
+      setSigninForm({ email: '', password: '' });
+      
+      // Clear success message after a moment
+      setTimeout(() => {
+        setAuthSuccess('');
+      }, 2000);
+      
+    } catch (error) {
+      console.error('Signin error:', error);
+      if (error instanceof Error) {
+        if (error.message.includes('User is not confirmed')) {
+          setAuthError('Your email is not verified. Please enter the verification code below.');
+          setPendingEmail(signinForm.email);
+          setShowVerification(true);
+        } else if (error.message.includes('Incorrect username or password')) {
+          setAuthError('Incorrect email or password. Please try again.');
+        } else {
+          setAuthError(error.message);
+        }
+      } else {
+        setAuthError('An error occurred during sign in. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendCode = async () => {
+    setAuthError('');
+    setAuthSuccess('');
+    setIsLoading(true);
+
+    try {
+      await resendSignUpCode({
+        username: pendingEmail
+      });
+      
+      setAuthSuccess('Verification code resent! Please check your email.');
+      
+      // Clear success message after a moment
+      setTimeout(() => {
+        setAuthSuccess('');
+      }, 3000);
+      
+    } catch (error) {
+      console.error('Resend error:', error);
+      if (error instanceof Error) {
+        setAuthError(error.message);
+      } else {
+        setAuthError('Failed to resend verification code. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerificationSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError('');
+    setAuthSuccess('');
+    setIsLoading(true);
+
+    try {
+      await confirmSignUp({
+        username: pendingEmail,
+        confirmationCode: verificationCode
+      });
+      
+      setAuthSuccess('Email verified successfully! You can now sign in.');
+      setShowVerification(false);
+      setVerificationCode('');
+      setPendingEmail('');
+      
+      // Switch to signin tab after successful verification
+      setTimeout(() => {
+        setActiveTab('signin');
+        setAuthSuccess('');
+      }, 2000);
+      
+    } catch (error) {
+      console.error('Verification error:', error);
+      if (error instanceof Error) {
+        if (error.message.includes('Invalid code')) {
+          setAuthError('Invalid verification code. Please check your email and try again.');
+        } else if (error.message.includes('CodeMismatchException')) {
+          setAuthError('Incorrect verification code. Please check your email and try again.');
+        } else {
+          setAuthError(error.message);
+        }
+      } else {
+        setAuthError('An error occurred during verification. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const togglePasswordVisibility = (field: 'signin' | 'signup' | 'confirm') => {
@@ -144,11 +308,25 @@ function App() {
 
                 {activeTab === 'signin' ? (
                   <form className="auth-form" onSubmit={handleSigninSubmit}>
+                    {/* Error and Success Messages */}
+                    {authError && (
+                      <div className="auth-error">
+                        {authError}
+                      </div>
+                    )}
+                    {authSuccess && (
+                      <div className="auth-success">
+                        {authSuccess}
+                      </div>
+                    )}
+                    
                     <div className="input-group">
                       <input 
                         type="email" 
                         placeholder="Enter your email" 
                         className="form-input"
+                        value={signinForm.email}
+                        onChange={(e) => setSigninForm(prev => ({ ...prev, email: e.target.value }))}
                         required
                       />
                       <span className="input-icon">Email</span>
@@ -159,6 +337,8 @@ function App() {
                         type={showSigninPassword ? "text" : "password"}
                         placeholder="Enter your password" 
                         className="form-input"
+                        value={signinForm.password}
+                        onChange={(e) => setSigninForm(prev => ({ ...prev, password: e.target.value }))}
                         required
                       />
                       <button 
@@ -181,7 +361,9 @@ function App() {
                       <a href="#forgot" className="forgot-link">Forgot Password?</a>
                     </div>
 
-                    <button type="submit" className="login-btn primary">Login</button>
+                    <button type="submit" className="login-btn primary" disabled={isLoading}>
+                      {isLoading ? 'Signing In...' : 'Login'}
+                    </button>
 
                     <div className="divider">
                       <span>OR</span>
@@ -193,6 +375,17 @@ function App() {
                   </form>
                 ) : (
                   <form className="auth-form" onSubmit={handleSignupSubmit}>
+                    {/* Error and Success Messages */}
+                    {authError && (
+                      <div className="auth-error">
+                        {authError}
+                      </div>
+                    )}
+                    {authSuccess && (
+                      <div className="auth-success">
+                        {authSuccess}
+                      </div>
+                    )}
                     <div className="input-group">
                       <input 
                         type="email" 
@@ -249,7 +442,9 @@ function App() {
                       <p>Password must contain at least 8 characters, including uppercase, lowercase, numbers, and special characters.</p>
                     </div>
 
-                    <button type="submit" className="login-btn primary">Create Account</button>
+                    <button type="submit" className="login-btn primary" disabled={isLoading}>
+                      {isLoading ? 'Creating Account...' : 'Create Account'}
+                    </button>
 
                     <div className="divider">
                       <span>OR</span>
@@ -257,6 +452,72 @@ function App() {
 
                     <div className="social-login">
                       <GoogleAuth />
+                    </div>
+                  </form>
+                )}
+
+                {/* Email Verification Form */}
+                {showVerification && (
+                  <form className="auth-form" onSubmit={handleVerificationSubmit}>
+                    <div className="verification-header">
+                      <h3>Verify Your Email</h3>
+                      <p>We sent a verification code to <strong>{pendingEmail}</strong></p>
+                    </div>
+
+                    {/* Error and Success Messages */}
+                    {authError && (
+                      <div className="auth-error">
+                        {authError}
+                      </div>
+                    )}
+                    {authSuccess && (
+                      <div className="auth-success">
+                        {authSuccess}
+                      </div>
+                    )}
+
+                    <div className="input-group">
+                      <input 
+                        type="text" 
+                        placeholder="Enter verification code" 
+                        className="form-input"
+                        value={verificationCode}
+                        onChange={(e) => setVerificationCode(e.target.value)}
+                        maxLength={6}
+                        required
+                      />
+                      <span className="input-icon">Code</span>
+                    </div>
+
+                    <button type="submit" className="login-btn primary" disabled={isLoading}>
+                      {isLoading ? 'Verifying...' : 'Verify Email'}
+                    </button>
+
+                    <div className="verification-footer">
+                      <p>Didn't receive the code? Check your spam folder or contact support.</p>
+                      <div className="verification-actions">
+                        <button 
+                          type="button" 
+                          className="resend-code"
+                          onClick={handleResendCode}
+                          disabled={isLoading}
+                        >
+                          Resend Code
+                        </button>
+                        <button 
+                          type="button" 
+                          className="back-to-signup"
+                          onClick={() => {
+                            setShowVerification(false);
+                            setVerificationCode('');
+                            setPendingEmail('');
+                            setAuthError('');
+                            setAuthSuccess('');
+                          }}
+                        >
+                          Back to Sign Up
+                        </button>
+                      </div>
                     </div>
                   </form>
                 )}

@@ -709,4 +709,104 @@
     padding: 8px 16px;
     font-size: 0.8rem;
   }
+}
+
+/* Auth Messages */
+.auth-error {
+  background-color: #fee;
+  color: #c53030;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  border: 1px solid #feb2b2;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.auth-success {
+  background-color: #f0fff4;
+  color: #2f855a;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  border: 1px solid #9ae6b4;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* Loading State */
+.login-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Verification Form */
+.verification-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.verification-header h3 {
+  color: var(--color-dark-orange);
+  font-family: var(--font-header);
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+}
+
+.verification-header p {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.verification-footer {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.verification-footer p {
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+  margin-bottom: 15px;
+}
+
+.back-to-signup {
+  background: none;
+  border: none;
+  color: var(--color-dark-orange);
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.back-to-signup:hover {
+  color: var(--color-orange);
+}
+
+.verification-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  align-items: center;
+}
+
+.resend-code {
+  background-color: var(--color-dark-orange);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.resend-code:hover:not(:disabled) {
+  background-color: var(--color-orange);
+}
+
+.resend-code:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 } 
