@@ -238,8 +238,6 @@ The project currently features a beautiful "Hello World" landing page. More comi
 - 
 ---
 
-**Writezilla** - Where creativity meets technology for writers.
-
-*Built with ❤️ using React, TypeScript, and AWS Amplify*
+*Built using React, TypeScript, and AWS Amplify*
 
 [View on GitHub](https://github.com/nithyabach/writezilla) 
