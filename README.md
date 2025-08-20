@@ -2,11 +2,9 @@
 
 A web application for writers to create novels and stories while getting inspiration from playlists, moodboards, graphics, and notes.
 
-## 🚀 Project Overview
+Writezilla is a comprehensive writing platform for writers to create, edit, and organize their stories while having access to integrated tools for graphics, notes, playlists, and moodboards.
 
-Writezilla is a comprehensive writing platform that combines traditional novel writing with modern inspiration tools. Writers can create, edit, and organize their stories while having access to integrated tools for graphics, notes, playlists, and moodboards.
-
-## 🎯 Features
+## Features
 
 ### Core Writing Features
 - **Rich Text Editor** with auto-save functionality
@@ -17,16 +15,14 @@ Writezilla is a comprehensive writing platform that combines traditional novel w
 
 ### Inspiration Tools
 - **Graphics Integration** - Upload and view maps, character designs, moodboards
-- **Notes System** - Story-specific notes with 200-word previews
+- **Notes System** - Story-specific notes 
 - **Playlist Integration** - Music inspiration while writing
 - **Search & Replace** - Advanced text editing tools
-- **Spellcheck & Grammar** - AI-powered writing assistance
 
 ### User Experience
 - **Focus Mode** - Distraction-free writing environment
 - **Responsive Design** - Works on desktop and tablet
 - **Real-time Collaboration** - Share and comment on stories
-- **Cloud Storage** - AWS-powered secure data storage
 
 ## 🛠 Tech Stack
 
@@ -48,19 +44,6 @@ Writezilla is a comprehensive writing platform that combines traditional novel w
 - **Document-Driven Design (DDD)** for specifications
 - **Jest** for unit and integration testing
 - **Cypress** for end-to-end testing
-
-## 🎨 Design System
-
-### Colors
-- **Dark Orange**: #DA5812
-- **Light Orange**: #DA5812 (74% transparency)
-- **Light Grey**: #E3E0DD
-- **White**: #E8E8E8
-
-### Typography
-- **Logo & Big Text**: Julius Sans One
-- **Header Options**: Antic Didone
-- **Body Text**: Antic Didone
 
 ## 📁 Project Structure
 
@@ -180,10 +163,10 @@ amplify publish
 ## 📈 MVP Roadmap
 
 ### Phase 1: Authentication & Dashboard ✅
-- [x] User authentication (email + Google OAuth)
-- [x] Dashboard with saved stories/graphics
-- [x] Navigation header
-- [x] Hello World landing page
+- [ ] User authentication (email + Google OAuth)
+- [ ] Dashboard with saved stories/graphics
+- [ ] Navigation header
+- [ ] Hello World landing page
 - [ ] Search functionality (placeholder)
 
 ### Phase 2: Story Creation & Management 🔄
@@ -251,16 +234,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🎨 Current Implementation
 
-The project currently features a beautiful "Hello World" landing page that demonstrates:
-
-- **Clean Design**: Modern, minimalist interface with Writezilla branding
-- **Responsive Layout**: Works perfectly on desktop and mobile devices
-- **Design System**: Consistent use of colors, typography, and spacing
-- **Interactive Elements**: Smooth hover effects and transitions
-- **Professional Styling**: Card-based layout with shadows and modern aesthetics
-
-Visit `http://localhost:3000` to see the current landing page in action!
-
+The project currently features a beautiful "Hello World" landing page. More coming soon!
+- 
 ---
 
 **Writezilla** - Where creativity meets technology for writers.
