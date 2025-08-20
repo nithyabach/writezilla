@@ -129,18 +129,60 @@ function App() {
           </div>
         </div>
 
-        {/* Right Panel - Abstract Background */}
+        {/* Right Panel - Writezilla Editor */}
         <div className="background-panel">
-          <div className="story-text">
-            <p>"Once upon a time, there lived a crocodile. The crocodile had a loving wife, and lived in the river, eating small fish that tasted delicious each time. One day, while basking in the sun on the riverbank, the crocodile met a clever monkey who lived in the trees nearby.</p>
+          <div className="editor-container">
+            {/* Editor Header */}
+            <div className="editor-header">
+              <div className="doc-title">The Crocodile and Monkey</div>
+              <div className="doc-actions">
+                <span className="save-status">All changes saved</span>
+              </div>
+            </div>
             
-            <p>The monkey was known throughout the forest for his wisdom and quick thinking. The crocodile, who was quite greedy, thought to himself, 'If I can trick this monkey into coming to my home, I can eat his heart and become as wise as he is.'</p>
+            {/* Editor Toolbar */}
+            <div className="editor-toolbar">
+              <div className="toolbar-group">
+                <button className="tool-btn" disabled>B</button>
+                <button className="tool-btn" disabled>I</button>
+                <button className="tool-btn" disabled>U</button>
+              </div>
+              <div className="toolbar-group">
+                <button className="tool-btn" disabled>Aa</button>
+                <button className="tool-btn" disabled>12</button>
+              </div>
+              <div className="toolbar-group">
+                <button className="tool-btn" disabled>≡</button>
+                <button className="tool-btn" disabled>•</button>
+              </div>
+            </div>
             
-            <p>'Dear monkey,' said the crocodile with a sly smile, 'I have heard that you are the wisest creature in the forest. Would you like to visit my beautiful home in the river? I have many delicious fruits that grow on the trees near my house.'</p>
+            {/* Editor Content */}
+            <div className="editor-content">
+              <div className="writing-area">
+                <div className="text-line">
+                  <span className="text-content">"Once upon a time, there lived a crocodile. The crocodile had a loving wife, and lived in the river, eating small fish that tasted delicious each time. One day, while basking in the sun on the riverbank, the crocodile met a clever monkey who lived in the trees nearby.</span>
+                </div>
+                
+                <div className="text-line">
+                  <span className="text-content">The monkey was known throughout the forest for his wisdom and quick thinking. The crocodile, who was quite greedy, thought to himself, 'If I can trick this monkey into coming to my home, I can eat his heart and become as wise as he is.'</span>
+                </div>
+                
+                <div className="text-line">
+                  <span className="text-content">'Dear monkey,' said the crocodile with a sly smile, 'I have heard that you are the wisest creature in the forest. Would you like to visit my beautiful home in the river? I have many delicious fruits that grow on the trees near my house.'</span>
+                </div>
+                
+                <div className="cursor-line">
+                  <span className="text-content">The monkey, being clever, sensed something was not quite right. But he was also curious and wanted to see the crocodile's home. 'That sounds wonderful,' replied the monkey, 'but how will I get there? I cannot swim like you.'</span>
+                  <span className="cursor">|</span>
+                </div>
+              </div>
+            </div>
             
-            <p>The monkey, being clever, sensed something was not quite right. But he was also curious and wanted to see the crocodile's home. 'That sounds wonderful,' replied the monkey, 'but how will I get there? I cannot swim like you.'</p>
-            
-            <p>'I will carry you on my back,' said the crocodile. 'You can hold onto my neck, and I will swim you safely across the river.'</p>
+            {/* Editor Footer */}
+            <div className="editor-footer">
+              <div className="word-count">156 words</div>
+            </div>
           </div>
         </div>
       </main>
