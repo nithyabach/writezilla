@@ -17,54 +17,136 @@ function App() {
             <a href="#features">Features</a>
             <a href="#contact">Contact</a>
           </nav>
-          <GoogleAuth />
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="main-content">
-        {isAuthenticated ? (
-          <div className="dashboard-section">
-            <h2 className="dashboard-title">Welcome back, {user?.name}!</h2>
-            <p className="dashboard-subtitle">Ready to create something amazing?</p>
-            <div className="dashboard-actions">
-              <button className="dashboard-btn primary">Create New Story</button>
-              <button className="dashboard-btn secondary">View My Stories</button>
-            </div>
-            <div className="quick-stats">
-              <div className="stat-card">
-                <h3>0</h3>
-                <p>Stories</p>
+      {/* Main Content - Split Layout */}
+      <main className="main-split-layout">
+        {/* Left Panel - Content */}
+        <div className="content-panel">
+          <div className="content-container">
+            {isAuthenticated ? (
+              <div className="dashboard-content">
+                <div className="welcome-section">
+                  <h2 className="welcome-title">Welcome Back, {user?.name}!</h2>
+                  <p className="welcome-subtitle">Ready to create something amazing today?</p>
+                </div>
+                
+                <div className="action-cards">
+                  <div className="action-card primary">
+                    <div className="card-icon">Create</div>
+                    <h3>Create New Story</h3>
+                    <p>Start writing your next masterpiece</p>
+                  </div>
+                  <div className="action-card secondary">
+                    <div className="card-icon">Stories</div>
+                    <h3>My Stories</h3>
+                    <p>Continue where you left off</p>
+                  </div>
+                  <div className="action-card secondary">
+                    <div className="card-icon">Mood</div>
+                    <h3>Moodboards</h3>
+                    <p>Get inspired with visuals</p>
+                  </div>
+                  <div className="action-card secondary">
+                    <div className="card-icon">Music</div>
+                    <h3>Playlists</h3>
+                    <p>Set the perfect writing mood</p>
+                  </div>
+                </div>
+
+                <div className="stats-section">
+                  <h3>Your Writing Journey</h3>
+                  <div className="stats-grid">
+                    <div className="stat-item">
+                      <span className="stat-number">0</span>
+                      <span className="stat-label">Stories</span>
+                    </div>
+                    <div className="stat-item">
+                      <span className="stat-number">0</span>
+                      <span className="stat-label">Words</span>
+                    </div>
+                    <div className="stat-item">
+                      <span className="stat-number">0</span>
+                      <span className="stat-label">Days</span>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="stat-card">
-                <h3>0</h3>
-                <p>Words Written</p>
+            ) : (
+              <div className="landing-content">
+                <div className="brand-section">
+                  <div className="brand-logo">
+                    <h1 className="brand-title">Writezilla</h1>
+                  </div>
+                  <p className="brand-tagline">The perfect writing tool</p>
+                </div>
+
+                <div className="auth-tabs">
+                  <button className="auth-tab active">Sign In</button>
+                  <button className="auth-tab">Sign Up</button>
+                </div>
+
+                <div className="auth-form">
+                  <div className="input-group">
+                    <input 
+                      type="email" 
+                      placeholder="Enter your email" 
+                      className="form-input"
+                    />
+                    <span className="input-icon">Email</span>
+                  </div>
+                  
+                  <div className="input-group">
+                    <input 
+                      type="password" 
+                      placeholder="Enter your password" 
+                      className="form-input"
+                    />
+                    <span className="input-icon">Password</span>
+                  </div>
+
+                  <div className="form-options">
+                    <label className="checkbox-label">
+                      <input type="checkbox" defaultChecked />
+                      <span className="checkmark"></span>
+                      Remember me
+                    </label>
+                    <a href="#forgot" className="forgot-link">Forgot Password?</a>
+                  </div>
+
+                  <button className="login-btn primary">Login</button>
+
+                  <div className="divider">
+                    <span>OR</span>
+                  </div>
+
+                  <div className="social-login">
+                    <GoogleAuth />
+                  </div>
+                </div>
               </div>
-              <div className="stat-card">
-                <h3>0</h3>
-                <p>Days Active</p>
-              </div>
-            </div>
+            )}
           </div>
-        ) : (
-          <div className="hello-world-section">
-            <h2 className="hello-title">Hello World!</h2>
-            <p className="hello-subtitle">Welcome to Writezilla</p>
-            <p className="hello-description">
-              Your creative writing companion for stories, novels, and inspiration.
-            </p>
-            <div className="cta-buttons">
-              <button className="cta-button primary">Get Started</button>
-              <button className="cta-button secondary">Learn More</button>
-            </div>
+        </div>
+
+        {/* Right Panel - Abstract Background */}
+        <div className="background-panel">
+          <div className="abstract-shapes">
+            <div className="shape shape-1"></div>
+            <div className="shape shape-2"></div>
+            <div className="shape shape-3"></div>
+            <div className="shape shape-4"></div>
+            <div className="shape shape-5"></div>
           </div>
-        )}
+        </div>
       </main>
 
       {/* Footer */}
       <footer className="footer">
         <div className="footer-content">
-          <p>&copy; 2024 Writezilla. All rights reserved.</p>
+          <p>© 2025 Writezilla. All rights reserved.</p>
+          <p>For more information, visit our <a href="#terms">Terms of Service</a> and <a href="#privacy">Privacy Policy</a>.</p>
         </div>
       </footer>
     </div>
