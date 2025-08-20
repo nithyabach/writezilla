@@ -11,7 +11,6 @@ function App() {
       {/* Header */}
       <header className="header">
         <div className="header-content">
-          <h1 className="logo">WRITEZILLA</h1>
           <nav className="navigation">
             <a href="#about">About</a>
             <a href="#features">Features</a>
@@ -132,12 +131,16 @@ function App() {
 
         {/* Right Panel - Abstract Background */}
         <div className="background-panel">
-          <div className="abstract-shapes">
-            <div className="shape shape-1"></div>
-            <div className="shape shape-2"></div>
-            <div className="shape shape-3"></div>
-            <div className="shape shape-4"></div>
-            <div className="shape shape-5"></div>
+          <div className="story-text">
+            <p>"Once upon a time, there lived a crocodile. The crocodile had a loving wife, and lived in the river, eating small fish that tasted delicious each time. One day, while basking in the sun on the riverbank, the crocodile met a clever monkey who lived in the trees nearby.</p>
+            
+            <p>The monkey was known throughout the forest for his wisdom and quick thinking. The crocodile, who was quite greedy, thought to himself, 'If I can trick this monkey into coming to my home, I can eat his heart and become as wise as he is.'</p>
+            
+            <p>'Dear monkey,' said the crocodile with a sly smile, 'I have heard that you are the wisest creature in the forest. Would you like to visit my beautiful home in the river? I have many delicious fruits that grow on the trees near my house.'</p>
+            
+            <p>The monkey, being clever, sensed something was not quite right. But he was also curious and wanted to see the crocodile's home. 'That sounds wonderful,' replied the monkey, 'but how will I get there? I cannot swim like you.'</p>
+            
+            <p>'I will carry you on my back,' said the crocodile. 'You can hold onto my neck, and I will swim you safely across the river.'</p>
           </div>
         </div>
       </main>
