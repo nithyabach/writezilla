@@ -54,16 +54,16 @@ describe('UserDashboard Component', () => {
       });
     });
 
-    test('should render action buttons', async () => {
-      render(<UserDashboard onSignOut={mockOnSignOut} />);
-      
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: 'Stories and Novels' })).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: 'Maps' })).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: 'Moodboards' })).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: 'Playlists' })).toBeInTheDocument();
-      });
-    });
+                test('should render action buttons', async () => {
+              render(<UserDashboard onSignOut={mockOnSignOut} />);
+              
+              await waitFor(() => {
+                expect(screen.getByRole('button', { name: 'Stories' })).toBeInTheDocument();
+                expect(screen.getByRole('button', { name: 'Graphics' })).toBeInTheDocument();
+                expect(screen.getByRole('button', { name: 'Notes' })).toBeInTheDocument();
+                expect(screen.getByRole('button', { name: 'Playlists' })).toBeInTheDocument();
+              });
+            });
 
     test('should render profile icon', async () => {
       render(<UserDashboard onSignOut={mockOnSignOut} />);
@@ -152,24 +152,58 @@ describe('UserDashboard Component', () => {
       render(<UserDashboard onSignOut={mockOnSignOut} />);
       
       await waitFor(() => {
-        const storiesButton = screen.getByRole('button', { name: 'Stories and Novels' });
-        const mapsButton = screen.getByRole('button', { name: 'Maps' });
-        const moodboardsButton = screen.getByRole('button', { name: 'Moodboards' });
+        const storiesButton = screen.getByRole('button', { name: 'Stories' });
+        const graphicsButton = screen.getByRole('button', { name: 'Graphics' });
+        const notesButton = screen.getByRole('button', { name: 'Notes' });
         const playlistsButton = screen.getByRole('button', { name: 'Playlists' });
         
         expect(storiesButton).toBeInTheDocument();
-        expect(mapsButton).toBeInTheDocument();
-        expect(moodboardsButton).toBeInTheDocument();
+        expect(graphicsButton).toBeInTheDocument();
+        expect(notesButton).toBeInTheDocument();
         expect(playlistsButton).toBeInTheDocument();
         
         // Test that they are clickable (even if functionality not implemented yet)
         fireEvent.click(storiesButton);
-        fireEvent.click(mapsButton);
-        fireEvent.click(moodboardsButton);
+        fireEvent.click(graphicsButton);
+        fireEvent.click(notesButton);
         fireEvent.click(playlistsButton);
         
         // Should not throw any errors
         expect(true).toBe(true);
+      });
+    });
+  });
+
+  describe('Search Bar', () => {
+    test('should render search bar below action buttons', async () => {
+      render(<UserDashboard onSignOut={mockOnSignOut} />);
+      
+      await waitFor(() => {
+        const searchInput = screen.getByRole('textbox', { name: /search/i });
+        expect(searchInput).toBeInTheDocument();
+        expect(searchInput).toHaveAttribute('placeholder', 'Search your content...');
+      });
+    });
+
+    test('should allow typing in search bar', async () => {
+      render(<UserDashboard onSignOut={mockOnSignOut} />);
+      
+      await waitFor(() => {
+        const searchInput = screen.getByRole('textbox', { name: /search/i });
+        
+        // Test typing functionality
+        fireEvent.change(searchInput, { target: { value: 'test search' } });
+        expect(searchInput).toHaveValue('test search');
+      });
+    });
+
+    test('should have proper accessibility attributes', async () => {
+      render(<UserDashboard onSignOut={mockOnSignOut} />);
+      
+      await waitFor(() => {
+        const searchInput = screen.getByRole('textbox', { name: /search/i });
+        expect(searchInput).toHaveAttribute('aria-label', 'Search your content');
+        expect(searchInput).toHaveAttribute('type', 'text');
       });
     });
   });
