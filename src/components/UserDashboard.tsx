@@ -11,15 +11,28 @@ interface User {
   };
 }
 
-interface UserDashboardProps {
-  onSignOut?: () => void;
-}
+        interface Story {
+          id: number;
+          title: string;
+          color: string;
+        }
 
-const UserDashboard: React.FC<UserDashboardProps> = ({ onSignOut }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const profileMenuRef = useRef<HTMLDivElement>(null);
+        interface UserDashboardProps {
+          onSignOut?: () => void;
+        }
+
+        const UserDashboard: React.FC<UserDashboardProps> = ({ onSignOut }) => {
+          const [user, setUser] = useState<User | null>(null);
+          const [isLoading, setIsLoading] = useState(true);
+          const [showProfileMenu, setShowProfileMenu] = useState(false);
+          const profileMenuRef = useRef<HTMLDivElement>(null);
+          const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+          const [storyToDelete, setStoryToDelete] = useState<number | null>(null);
+          
+          // Stories state
+          const [stories, setStories] = useState<Story[]>([]);
+          
+          const colors = ['green', 'blue', 'black', 'brown'];
 
   useEffect(() => {
     loadUserData();
@@ -49,27 +62,56 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ onSignOut }) => {
     }
   };
 
-  const handleSignOut = async () => {
-    console.log('Sign out button clicked');
-    try {
-      // Sign out from AWS Cognito
-      console.log('Signing out from AWS Cognito...');
-      await signOut();
-      console.log('AWS Cognito sign out successful');
-      
+            const handleSignOut = async () => {
+            console.log('Sign out button clicked');
+            try {
+              // Sign out from AWS Cognito
+              console.log('Signing out from AWS Cognito...');
+              await signOut();
+              console.log('AWS Cognito sign out successful');
+              
 
-      
-      // Clear user state and notify parent component
-      console.log('Clearing user state and calling onSignOut...');
-      setUser(null);
-      if (onSignOut) {
-        onSignOut();
-      }
-      console.log('Sign out process completed');
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
-  };
+              
+              // Clear user state and notify parent component
+              console.log('Clearing user state and calling onSignOut...');
+              setUser(null);
+              if (onSignOut) {
+                onSignOut();
+              }
+              console.log('Sign out process completed');
+            } catch (error) {
+              console.error('Error signing out:', error);
+            }
+          };
+
+          const handleCreateStory = () => {
+            const nextId = stories.length > 0 ? Math.max(...stories.map(story => story.id)) + 1 : 1;
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            const newStory = {
+              id: nextId,
+              title: `New Story ${nextId}`,
+              color: randomColor
+            };
+            setStories([...stories, newStory]);
+          };
+
+          const handleDeleteStory = (storyId: number) => {
+            setStoryToDelete(storyId);
+            setShowDeleteConfirm(true);
+          };
+
+          const confirmDelete = () => {
+            if (storyToDelete) {
+              setStories(stories.filter(story => story.id !== storyToDelete));
+              setShowDeleteConfirm(false);
+              setStoryToDelete(null);
+            }
+          };
+
+          const cancelDelete = () => {
+            setShowDeleteConfirm(false);
+            setStoryToDelete(null);
+          };
 
   if (isLoading) {
     return (
@@ -135,34 +177,95 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ onSignOut }) => {
             {/* Separator Line */}
             <div className="separator-line"></div>
             
-            {/* Action Buttons */}
-            <div className="action-buttons">
-              <button className="action-button">Stories</button>
-              <button className="action-button">Graphics</button>
-              <button className="action-button">Notes</button>
-              <button className="action-button">Playlists</button>
-            </div>
+                                {/* Action Buttons */}
+                    <div className="action-buttons">
+                      <button className="action-button" onClick={handleCreateStory}>Stories</button>
+                      <button className="action-button">Graphics</button>
+                      <button className="action-button">Notes</button>
+                      <button className="action-button">Playlists</button>
+                    </div>
 
-            {/* Search Bar */}
-            <div className="search-container">
-              <div className="search-input-wrapper">
-                <svg className="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-                </svg>
-                <input
-                  type="text"
-                  className="search-input"
-                  placeholder="Search your content..."
-                  aria-label="Search your content"
-                  data-testid="search-input"
-                />
-              </div>
+                                {/* Search Bar */}
+                    <div className="search-container">
+                      <div className="search-input-wrapper">
+                        <svg className="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                        </svg>
+                        <input
+                          type="text"
+                          className="search-input"
+                          placeholder="Search your content..."
+                          aria-label="Search your content"
+                          data-testid="search-input"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Writing Section */}
+                    <div className="writing-section">
+                      <h3 className="section-title">Writing</h3>
+                      <div className="stories-grid">
+                        {stories.map((story) => (
+                          <div 
+                            key={story.id} 
+                            className={`story-cover cover-${story.color}`} 
+                            data-testid="story-cover"
+                          >
+                            <div className={`cover-image cover-${story.color}`}>
+                              <div className="cover-placeholder">{story.title}</div>
+                              <button 
+                                className="delete-book-btn"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteStory(story.id);
+                                }}
+                                aria-label={`Delete ${story.title}`}
+                                data-testid="delete-book-btn"
+                              >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                  <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                </svg>
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </main>
+
+              {/* Delete Confirmation Dialog */}
+              {showDeleteConfirm && (
+                <div className="delete-confirm-overlay" data-testid="delete-confirm-overlay">
+                  <div className="delete-confirm-dialog">
+                    <div className="delete-confirm-header">
+                      <h3>Delete Book</h3>
+                    </div>
+                    <div className="delete-confirm-content">
+                      <p>Deleting this book would delete all chapters within this, and this cannot be reversed.</p>
+                    </div>
+                    <div className="delete-confirm-actions">
+                      <button 
+                        className="delete-confirm-cancel"
+                        onClick={cancelDelete}
+                        data-testid="delete-cancel-btn"
+                      >
+                        Cancel
+                      </button>
+                      <button 
+                        className="delete-confirm-delete"
+                        onClick={confirmDelete}
+                        data-testid="delete-confirm-btn"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
-        </div>
-      </main>
-    </div>
-  );
-};
+          );
+        };
 
 export default UserDashboard; 

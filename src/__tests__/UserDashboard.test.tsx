@@ -172,6 +172,44 @@ describe('UserDashboard Component', () => {
         expect(true).toBe(true);
       });
     });
+
+    test('should create a new story when Stories button is clicked', async () => {
+      render(<UserDashboard onSignOut={mockOnSignOut} />);
+      
+      await waitFor(() => {
+        const storiesButton = screen.getByRole('button', { name: 'Stories' });
+        fireEvent.click(storiesButton);
+      });
+      
+      // Should now have one story
+      await waitFor(() => {
+        const storyCovers = screen.getAllByTestId('story-cover');
+        expect(storyCovers).toHaveLength(1);
+      });
+    });
+
+    test('should create multiple stories with different IDs', async () => {
+      render(<UserDashboard onSignOut={mockOnSignOut} />);
+      
+      await waitFor(() => {
+        const storiesButton = screen.getByRole('button', { name: 'Stories' });
+        
+        // Create first story
+        fireEvent.click(storiesButton);
+        
+        // Create second story
+        fireEvent.click(storiesButton);
+        
+        // Create third story
+        fireEvent.click(storiesButton);
+      });
+      
+      // Should now have three stories
+      await waitFor(() => {
+        const storyCovers = screen.getAllByTestId('story-cover');
+        expect(storyCovers).toHaveLength(3);
+      });
+    });
   });
 
   describe('Search Bar', () => {
@@ -204,6 +242,130 @@ describe('UserDashboard Component', () => {
         const searchInput = screen.getByRole('textbox', { name: /search/i });
         expect(searchInput).toHaveAttribute('aria-label', 'Search your content');
         expect(searchInput).toHaveAttribute('type', 'text');
+      });
+    });
+  });
+
+  describe('Writing Section', () => {
+    test('should render Writing section title', async () => {
+      render(<UserDashboard onSignOut={mockOnSignOut} />);
+      
+      await waitFor(() => {
+        expect(screen.getByText('Writing')).toBeInTheDocument();
+      });
+    });
+
+    test('should start with no stories by default', async () => {
+      render(<UserDashboard onSignOut={mockOnSignOut} />);
+      
+      await waitFor(() => {
+        const storyCovers = screen.queryAllByTestId('story-cover');
+        expect(storyCovers).toHaveLength(0);
+      });
+    });
+
+    test('should show stories after creating them', async () => {
+      render(<UserDashboard onSignOut={mockOnSignOut} />);
+      
+      await waitFor(() => {
+        const storiesButton = screen.getByRole('button', { name: 'Stories' });
+        fireEvent.click(storiesButton);
+      });
+      
+      await waitFor(() => {
+        const storyCovers = screen.getAllByTestId('story-cover');
+        expect(storyCovers).toHaveLength(1);
+      });
+    });
+  });
+
+  describe('Story Delete Functionality', () => {
+    test('should show delete button on story hover', async () => {
+      render(<UserDashboard onSignOut={mockOnSignOut} />);
+      
+      // Create a story first
+      await waitFor(() => {
+        const storiesButton = screen.getByRole('button', { name: 'Stories' });
+        fireEvent.click(storiesButton);
+      });
+      
+      await waitFor(() => {
+        const storyCover = screen.getByTestId('story-cover');
+        const deleteButton = screen.getByTestId('delete-book-btn');
+        expect(deleteButton).toBeInTheDocument();
+      });
+    });
+
+    test('should open delete confirmation dialog when delete button is clicked', async () => {
+      render(<UserDashboard onSignOut={mockOnSignOut} />);
+      
+      // Create a story first
+      await waitFor(() => {
+        const storiesButton = screen.getByRole('button', { name: 'Stories' });
+        fireEvent.click(storiesButton);
+      });
+      
+      await waitFor(() => {
+        const deleteButton = screen.getByTestId('delete-book-btn');
+        fireEvent.click(deleteButton);
+      });
+      
+      // Should show confirmation dialog
+      await waitFor(() => {
+        expect(screen.getByTestId('delete-confirm-overlay')).toBeInTheDocument();
+        expect(screen.getByText('Delete Book')).toBeInTheDocument();
+        expect(screen.getByText('Deleting this book would delete all chapters within this, and this cannot be reversed.')).toBeInTheDocument();
+      });
+    });
+
+    test('should close dialog when cancel is clicked', async () => {
+      render(<UserDashboard onSignOut={mockOnSignOut} />);
+      
+      // Create a story first
+      await waitFor(() => {
+        const storiesButton = screen.getByRole('button', { name: 'Stories' });
+        fireEvent.click(storiesButton);
+      });
+      
+      await waitFor(() => {
+        const deleteButton = screen.getByTestId('delete-book-btn');
+        fireEvent.click(deleteButton);
+      });
+      
+      await waitFor(() => {
+        const cancelButton = screen.getByTestId('delete-cancel-btn');
+        fireEvent.click(cancelButton);
+      });
+      
+      // Dialog should be closed
+      await waitFor(() => {
+        expect(screen.queryByTestId('delete-confirm-overlay')).not.toBeInTheDocument();
+      });
+    });
+
+    test('should delete story when confirm is clicked', async () => {
+      render(<UserDashboard onSignOut={mockOnSignOut} />);
+      
+      // Create a story first
+      await waitFor(() => {
+        const storiesButton = screen.getByRole('button', { name: 'Stories' });
+        fireEvent.click(storiesButton);
+      });
+      
+      await waitFor(() => {
+        const deleteButton = screen.getByTestId('delete-book-btn');
+        fireEvent.click(deleteButton);
+      });
+      
+      await waitFor(() => {
+        const confirmButton = screen.getByTestId('delete-confirm-btn');
+        fireEvent.click(confirmButton);
+      });
+      
+      // Story should be deleted and dialog closed
+      await waitFor(() => {
+        expect(screen.queryByTestId('delete-confirm-overlay')).not.toBeInTheDocument();
+        expect(screen.queryAllByTestId('story-cover')).toHaveLength(0);
       });
     });
   });
