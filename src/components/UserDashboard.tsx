@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { getCurrentUser, signOut } from 'aws-amplify/auth';
 import { getAuth, signOut as firebaseSignOut } from 'firebase/auth';
+import './UserDashboard.css';
 
 interface User {
   username: string;
@@ -17,9 +18,24 @@ interface UserDashboardProps {
 const UserDashboard: React.FC<UserDashboardProps> = ({ onSignOut }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadUserData();
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+        setShowProfileMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
   const loadUserData = async () => {
@@ -77,7 +93,6 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ onSignOut }) => {
   }
 
   const userName = user?.attributes?.name || user?.username?.split('@')[0] || 'Writer';
-  const userEmail = user?.attributes?.email || user?.username || '';
 
   return (
     <div className="user-dashboard">
@@ -85,105 +100,57 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ onSignOut }) => {
       <header className="dashboard-header">
         <div className="dashboard-header-content">
           <div className="dashboard-brand">
-            <h1 className="dashboard-title">Writezilla</h1>
-            <span className="dashboard-subtitle">Your Writing Platform</span>
+            <h1 className="dashboard-title">WRITEZILLA</h1>
           </div>
-          <div className="user-menu">
-            <div className="user-info">
-              <span className="user-name">{userName}</span>
-              <span className="user-email">{userEmail}</span>
-            </div>
-            <button className="sign-out-btn" onClick={handleSignOut}>
-              Sign Out
+          
+          {/* Navigation Tabs */}
+          <nav className="dashboard-navigation">
+            <ul>
+              <li><a href="#stories">Stories</a></li>
+              <li><a href="#graphics">Graphics</a></li>
+              <li><a href="#notes">Notes</a></li>
+              <li><a href="#playlists">Playlists</a></li>
+            </ul>
+          </nav>
+
+          {/* Profile Menu */}
+          <div className="user-menu" ref={profileMenuRef}>
+            <button 
+              className="profile-button"
+              onClick={() => setShowProfileMenu(!showProfileMenu)}
+              aria-label="Profile menu"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+              </svg>
             </button>
+            
+            {showProfileMenu && (
+              <div className="profile-dropdown">
+                <button className="dropdown-item" onClick={handleSignOut}>
+                  Sign Out
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="dashboard-main">
-        <div className="welcome-section">
-          <div className="welcome-content">
-            <h2 className="welcome-title">Hello, {userName}! 👋</h2>
-            <p className="welcome-message">
-              Welcome to Writezilla! Your creative journey starts here. 
-              Ready to write your next masterpiece?
-            </p>
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="quick-actions">
-          <h3 className="section-title">Quick Actions</h3>
-          <div className="action-grid">
-            <div className="action-card primary">
-              <div className="action-icon">✍️</div>
-              <h4>Start Writing</h4>
-              <p>Create a new story or continue where you left off</p>
-              <button className="action-btn">Begin Writing</button>
-            </div>
+        <div className="content-container">
+          <div className="main-content">
+            <h2 className="main-heading">What will you create today?</h2>
             
-            <div className="action-card">
-              <div className="action-icon">📚</div>
-              <h4>My Stories</h4>
-              <p>View and manage your existing stories</p>
-              <button className="action-btn">View Stories</button>
-            </div>
+            {/* Separator Line */}
+            <div className="separator-line"></div>
             
-            <div className="action-card">
-              <div className="action-icon">🎨</div>
-              <h4>Moodboards</h4>
-              <p>Get inspired with visual moodboards</p>
-              <button className="action-btn">Create Moodboard</button>
-            </div>
-            
-            <div className="action-card">
-              <div className="action-icon">🎵</div>
-              <h4>Playlists</h4>
-              <p>Set the perfect writing atmosphere</p>
-              <button className="action-btn">Manage Playlists</button>
-            </div>
-          </div>
-        </div>
-
-        {/* Writing Stats */}
-        <div className="writing-stats">
-          <h3 className="section-title">Your Writing Journey</h3>
-          <div className="stats-grid">
-            <div className="stat-card">
-              <div className="stat-number">0</div>
-              <div className="stat-label">Stories</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-number">0</div>
-              <div className="stat-label">Words Written</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-number">0</div>
-              <div className="stat-label">Writing Days</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-number">0</div>
-              <div className="stat-label">Hours Spent</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Getting Started */}
-        <div className="getting-started">
-          <h3 className="section-title">Getting Started</h3>
-          <div className="tips-grid">
-            <div className="tip-card">
-              <h4>🎯 Set Your Goals</h4>
-              <p>Define your writing goals and track your progress</p>
-            </div>
-            <div className="tip-card">
-              <h4>📝 Start Small</h4>
-              <p>Begin with short writing sessions to build momentum</p>
-            </div>
-            <div className="tip-card">
-              <h4>🎨 Get Inspired</h4>
-              <p>Use moodboards and playlists to spark creativity</p>
+            {/* Action Buttons */}
+            <div className="action-buttons">
+              <button className="action-button">Stories and Novels</button>
+              <button className="action-button">Maps</button>
+              <button className="action-button">Moodboards</button>
+              <button className="action-button">Playlists</button>
             </div>
           </div>
         </div>
