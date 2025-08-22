@@ -1,0 +1,14 @@
+{
+  "resourceName": "writerbooks",
+  "policyUUID": "71cdc3ed",
+  "bucketName": "writezilla849ff6756e574cbfaf1467f79653636a",
+  "storageAccess": "auth",
+  "guestAccess": [],
+  "authAccess": [
+    "CREATE_AND_UPDATE",
+    "READ",
+    "DELETE"
+  ],
+  "triggerFunction": "S3Trigger2f1af0a1",
+  "groupAccess": {}
+}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getCurrentUser, signOut } from 'aws-amplify/auth';
+import { StoryService, Story as StoryType } from '../services/storyService';
 
 import './UserDashboard.css';
 
@@ -11,11 +12,13 @@ interface User {
   };
 }
 
-        interface Story {
-          id: number;
-          title: string;
-          color: string;
-        }
+        interface LocalStory {
+  id: number;
+  awsId: string; // Store the actual AWS ID
+  title: string;
+  color: string;
+  version?: number; // Store the version for conflict resolution
+}
 
         interface UserDashboardProps {
           onSignOut?: () => void;
@@ -28,15 +31,18 @@ interface User {
           const profileMenuRef = useRef<HTMLDivElement>(null);
           const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
           const [storyToDelete, setStoryToDelete] = useState<number | null>(null);
+          const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
           
           // Stories state
-          const [stories, setStories] = useState<Story[]>([]);
+          const [stories, setStories] = useState<LocalStory[]>([]);
+          const [storyCounter, setStoryCounter] = useState(1);
           
           const colors = ['green', 'blue', 'black', 'brown'];
 
-  useEffect(() => {
-    loadUserData();
-  }, []);
+            useEffect(() => {
+            loadUserData();
+            loadUserStories();
+          }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -51,16 +57,60 @@ interface User {
     };
   }, []);
 
-  const loadUserData = async () => {
-    try {
-      const currentUser = await getCurrentUser();
-      setUser(currentUser);
-    } catch (error) {
-      console.error('Error loading user data:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+            const loadUserData = async () => {
+            try {
+              const currentUser = await getCurrentUser();
+              setUser(currentUser);
+            } catch (error) {
+              console.error('Error loading user data:', error);
+            } finally {
+              setIsLoading(false);
+            }
+          };
+
+          const loadUserStories = async () => {
+            try {
+              const userId = await StoryService.getCurrentUserId();
+              const awsStories = await StoryService.getUserStories(userId);
+              console.log('Loaded AWS stories:', awsStories);
+              console.log('Number of stories loaded:', awsStories.length);
+              if (awsStories.length > 0) {
+                console.log('First AWS story details:', JSON.stringify(awsStories[0], null, 2));
+              }
+              
+              // Convert AWS stories to local format
+              const localStories: LocalStory[] = awsStories.map((story, index) => ({
+                id: index + 1,
+                awsId: story.id, // Store the actual AWS ID
+                title: story.title || `New Story ${index + 1}`, // Fallback if title is corrupted
+                color: story.color,
+                version: story._version // Store the version for conflict resolution
+              }));
+              
+              console.log('Converted to local stories:', localStories);
+              console.log('Story IDs in loaded stories:', awsStories.map(s => s.id));
+              console.log('Story user IDs:', awsStories.map(s => s.userId));
+              setStories(localStories);
+              
+              // Set the counter to the next number after the highest existing story number
+              if (localStories.length > 0) {
+                const storyNumbers = localStories
+                  .map(story => {
+                    const match = story.title.match(/New Story (\d+)/);
+                    return match ? parseInt(match[1]) : 0;
+                  })
+                  .filter(num => !isNaN(num));
+                
+                if (storyNumbers.length > 0) {
+                  const maxNumber = Math.max(...storyNumbers);
+                  setStoryCounter(maxNumber + 1);
+                }
+              }
+            } catch (error) {
+              console.error('Error loading user stories:', error);
+              // Keep empty stories array if loading fails
+            }
+          };
 
             const handleSignOut = async () => {
             console.log('Sign out button clicked');
@@ -84,15 +134,48 @@ interface User {
             }
           };
 
-          const handleCreateStory = () => {
-            const nextId = stories.length > 0 ? Math.max(...stories.map(story => story.id)) + 1 : 1;
-            const randomColor = colors[Math.floor(Math.random() * colors.length)];
-            const newStory = {
-              id: nextId,
-              title: `New Story ${nextId}`,
-              color: randomColor
-            };
-            setStories([...stories, newStory]);
+          const handleCreateStory = async () => {
+            try {
+              const userId = await StoryService.getCurrentUserId();
+              const randomColor = colors[Math.floor(Math.random() * colors.length)];
+              const title = `New Story ${storyCounter}`;
+              console.log('Creating story with title:', title, 'counter:', storyCounter);
+              
+              const newStory = await StoryService.createStory({
+                title,
+                color: randomColor,
+                userId
+              });
+              
+              console.log('AWS createStory response:', newStory);
+              
+              // Convert AWS Story to LocalStory format
+              const localStory: LocalStory = {
+                id: storyCounter,
+                awsId: newStory.id, // Store the actual AWS ID
+                title: title, // Use our generated title, not AWS response
+                color: newStory.color,
+                version: newStory._version // Store the version for conflict resolution
+              };
+              
+              console.log('Local story created:', localStory);
+              
+              setStories([...stories, localStory]);
+              setStoryCounter(storyCounter + 1);
+            } catch (error) {
+              console.error('Error creating story:', error);
+              // Fallback to local creation if AWS fails
+              const randomColor = colors[Math.floor(Math.random() * colors.length)];
+              const newStory: LocalStory = {
+                id: storyCounter,
+                awsId: `local-${storyCounter}`, // Generate a local ID for fallback
+                title: `New Story ${storyCounter}`,
+                color: randomColor,
+                version: 1 // Default version for local stories
+              };
+              setStories([...stories, newStory]);
+              setStoryCounter(storyCounter + 1);
+            }
           };
 
           const handleDeleteStory = (storyId: number) => {
@@ -100,9 +183,30 @@ interface User {
             setShowDeleteConfirm(true);
           };
 
-          const confirmDelete = () => {
+          const confirmDelete = async () => {
             if (storyToDelete) {
-              setStories(stories.filter(story => story.id !== storyToDelete));
+              try {
+                // Find the story to get its AWS ID
+                const storyToDeleteObj = stories.find(s => s.id === storyToDelete);
+                console.log('Story to delete:', storyToDeleteObj);
+                console.log('All stories:', stories);
+                console.log('Story to delete details:', JSON.stringify(storyToDeleteObj, null, 2));
+                
+                if (storyToDeleteObj && !storyToDeleteObj.awsId.startsWith('local-')) {
+                  // Only delete from AWS if it's not a local fallback story
+                                  console.log('Deleting from AWS with ID:', storyToDeleteObj.awsId, 'version:', storyToDeleteObj.version);
+                console.log('Current user ID:', await StoryService.getCurrentUserId());
+                await StoryService.deleteStory(storyToDeleteObj.awsId, storyToDeleteObj.version);
+                console.log('Successfully deleted from AWS');
+                } else {
+                  console.log('Skipping AWS deletion - local story or no story found');
+                }
+                setStories(stories.filter(story => story.id !== storyToDelete));
+              } catch (error) {
+                console.error('Error deleting story:', error);
+                // Fallback to local deletion if AWS fails
+                setStories(stories.filter(story => story.id !== storyToDelete));
+              }
               setShowDeleteConfirm(false);
               setStoryToDelete(null);
             }
@@ -111,6 +215,38 @@ interface User {
           const cancelDelete = () => {
             setShowDeleteConfirm(false);
             setStoryToDelete(null);
+          };
+
+          const handleDeleteAllStories = () => {
+            setShowDeleteAllConfirm(true);
+          };
+
+          const confirmDeleteAll = async () => {
+            try {
+              // Get the actual AWS stories to delete
+              const userId = await StoryService.getCurrentUserId();
+              const awsStories = await StoryService.getUserStories(userId);
+              
+              // Delete all stories from AWS using their actual IDs
+              const deletePromises = awsStories.map(story => 
+                StoryService.deleteStory(story.id)
+              );
+              await Promise.all(deletePromises);
+              
+              // Clear local state
+              setStories([]);
+              setStoryCounter(1);
+            } catch (error) {
+              console.error('Error deleting all stories:', error);
+              // Fallback to local deletion if AWS fails
+              setStories([]);
+              setStoryCounter(1);
+            }
+            setShowDeleteAllConfirm(false);
+          };
+
+          const cancelDeleteAll = () => {
+            setShowDeleteAllConfirm(false);
           };
 
   if (isLoading) {
@@ -203,7 +339,18 @@ interface User {
 
                     {/* Writing Section */}
                     <div className="writing-section">
-                      <h3 className="section-title">Writing</h3>
+                      <div className="section-header">
+                        <h3 className="section-title">Writing</h3>
+                        {stories.length > 0 && (
+                          <button 
+                            className="delete-all-btn"
+                            onClick={handleDeleteAllStories}
+                            data-testid="delete-all-btn"
+                          >
+                            Delete All Stories
+                          </button>
+                        )}
+                      </div>
                       <div className="stories-grid">
                         {stories.map((story) => (
                           <div 
@@ -259,6 +406,36 @@ interface User {
                         data-testid="delete-confirm-btn"
                       >
                         Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Delete All Confirmation Dialog */}
+              {showDeleteAllConfirm && (
+                <div className="delete-confirm-overlay" data-testid="delete-all-confirm-overlay">
+                  <div className="delete-confirm-dialog">
+                    <div className="delete-confirm-header">
+                      <h3>Delete All Stories</h3>
+                    </div>
+                    <div className="delete-confirm-content">
+                      <p>This will permanently delete all {stories.length} stories and cannot be reversed. Are you sure?</p>
+                    </div>
+                    <div className="delete-confirm-actions">
+                      <button 
+                        className="delete-confirm-cancel"
+                        onClick={cancelDeleteAll}
+                        data-testid="delete-all-cancel-btn"
+                      >
+                        Cancel
+                      </button>
+                      <button 
+                        className="delete-confirm-delete"
+                        onClick={confirmDeleteAll}
+                        data-testid="delete-all-confirm-btn"
+                      >
+                        Delete All
                       </button>
                     </div>
                   </div>

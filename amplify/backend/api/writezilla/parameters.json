@@ -1,0 +1,11 @@
+{
+  "AppSyncApiName": "writezilla",
+  "DynamoDBBillingMode": "PAY_PER_REQUEST",
+  "DynamoDBEnableServerSideEncryption": false,
+  "AuthCognitoUserPoolId": {
+    "Fn::GetAtt": [
+      "authwritezilla2e92aa4a",
+      "Outputs.UserPoolId"
+    ]
+  }
+}
