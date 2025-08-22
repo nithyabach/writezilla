@@ -644,29 +644,31 @@ function App() {
   if (isLoadingAuth) {
     return (
       <div className="loading-screen">
-        <div className="loading-spinner"></div>
+        <div className="loading-spinner" data-testid="loading-spinner"></div>
         <p>Loading...</p>
       </div>
     );
   }
 
   return (
-    <Routes>
-      {/* OAuth Callback Route */}
-      <Route path="/oauth/callback" element={<OAuthCallback />} />
-      
-      {/* Main App Routes */}
-      <Route 
-        path="/" 
-        element={
-          currentUser ? (
-            <UserDashboard onSignOut={handleSignOut} />
-          ) : (
-            <LandingPage />
-          )
-        } 
-      />
-    </Routes>
+    <div data-testid="app-container" className="App">
+      <Routes>
+        {/* OAuth Callback Route */}
+        <Route path="/oauth/callback" element={<OAuthCallback />} />
+        
+        {/* Main App Routes */}
+        <Route 
+          path="/" 
+          element={
+            currentUser ? (
+              <UserDashboard onSignOut={handleSignOut} />
+            ) : (
+              <LandingPage />
+            )
+          } 
+        />
+      </Routes>
+    </div>
   );
 }
 

@@ -85,7 +85,7 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ onSignOut }) => {
   const userName = user?.attributes?.name || user?.username?.split('@')[0] || 'Writer';
 
   return (
-    <div className="user-dashboard">
+    <div className="user-dashboard" data-testid="user-dashboard">
       {/* Header */}
       <header className="dashboard-header">
         <div className="dashboard-header-content">

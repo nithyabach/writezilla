@@ -24,4 +24,8 @@ jest.mock('aws-amplify', () => ({
   Amplify: {
     configure: jest.fn(),
   },
-})); 
+}));
+
+
+
+ 
