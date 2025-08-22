@@ -1,6 +1,7 @@
 import { AuthService } from '../authService';
 import { 
   signInWithRedirect, 
+  signIn,
   signUp, 
   signOut, 
   getCurrentUser, 
@@ -15,6 +16,7 @@ import { UserProfile, LoginCredentials, SignUpCredentials, AuthError } from '../
 jest.mock('aws-amplify/auth');
 
 const mockSignInWithRedirect = signInWithRedirect as jest.MockedFunction<typeof signInWithRedirect>;
+const mockSignIn = signIn as jest.MockedFunction<typeof signIn>;
 const mockSignUp = signUp as jest.MockedFunction<typeof signUp>;
 const mockSignOut = signOut as jest.MockedFunction<typeof signOut>;
 const mockGetCurrentUser = getCurrentUser as jest.MockedFunction<typeof getCurrentUser>;
@@ -63,8 +65,7 @@ describe('AuthService', () => {
     it('should successfully sign up a new user', async () => {
       // Arrange
       const mockSignUpResult = {
-        user: { userId: 'test-user-id' },
-        userSub: 'test-user-sub',
+        userId: 'test-user-id',
         isSignUpComplete: false
       };
       mockSignUp.mockResolvedValue(mockSignUpResult);
@@ -85,7 +86,6 @@ describe('AuthService', () => {
       });
       expect(result).toEqual({
         userId: 'test-user-id',
-        userSub: 'test-user-sub',
         isSignUpComplete: false
       });
     });
@@ -145,7 +145,7 @@ describe('AuthService', () => {
         sub: 'test-user-sub'
       };
 
-      mockSignInWithRedirect.mockResolvedValue();
+      mockSignIn.mockResolvedValue();
       mockGetCurrentUser.mockResolvedValue(mockUser);
       mockFetchUserAttributes.mockResolvedValue(mockAttributes);
 
@@ -153,7 +153,7 @@ describe('AuthService', () => {
       const result = await authService.signIn(loginCredentials);
 
       // Assert
-      expect(mockSignInWithRedirect).toHaveBeenCalledWith({
+      expect(mockSignIn).toHaveBeenCalledWith({
         username: loginCredentials.email,
         password: loginCredentials.password
       });
@@ -171,7 +171,7 @@ describe('AuthService', () => {
     it('should throw error when sign in fails', async () => {
       // Arrange
       const error = new Error('Invalid credentials');
-      mockSignInWithRedirect.mockRejectedValue(error);
+      mockSignIn.mockRejectedValue(error);
 
       // Act & Assert
       await expect(authService.signIn(loginCredentials)).rejects.toThrow('Invalid credentials');
