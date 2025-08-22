@@ -1,26 +1,26 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { Auth } from 'aws-amplify';
-import { GoogleAuthProvider } from '@aws-amplify/ui-react';
+import { signInWithRedirect, signOut, getCurrentUser } from 'aws-amplify/auth';
 import GoogleAuth from '../../components/auth/GoogleAuth';
 
-// Mock AWS Amplify Auth
-jest.mock('aws-amplify', () => ({
-  Auth: {
-    federatedSignIn: jest.fn(),
-    currentAuthenticatedUser: jest.fn(),
-    signOut: jest.fn(),
-  },
-}));
-
-// Mock Google OAuth
-jest.mock('@aws-amplify/ui-react', () => ({
-  GoogleAuthProvider: jest.fn(),
+// Mock AWS Amplify auth functions
+jest.mock('aws-amplify/auth', () => ({
+  signInWithRedirect: jest.fn(),
+  signOut: jest.fn(),
+  getCurrentUser: jest.fn(),
+  fetchUserAttributes: jest.fn(),
 }));
 
 describe('GoogleAuth Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Set up default mock implementations
+    (signInWithRedirect as jest.Mock).mockResolvedValue({ success: true });
+    (signOut as jest.Mock).mockResolvedValue({});
+    (getCurrentUser as jest.Mock).mockResolvedValue({ 
+      username: 'test@example.com',
+      userId: 'test-user-id'
+    });
   });
 
   describe('Component Rendering', () => {
@@ -31,28 +31,7 @@ describe('GoogleAuth Component', () => {
       expect(screen.getByRole('button')).toHaveClass('google-login-btn');
     });
 
-    test('should render user profile when authenticated', async () => {
-      const mockUser = {
-        username: 'test@example.com',
-        attributes: {
-          email: 'test@example.com',
-          name: 'Test User',
-          picture: 'https://example.com/avatar.jpg'
-        }
-      };
-
-      (Auth.currentAuthenticatedUser as jest.Mock).mockResolvedValue(mockUser);
-
-      render(<GoogleAuth />);
-      
-      await waitFor(() => {
-        // Component only shows login button, not user profile
-        expect(screen.getByText('Sign in with Google')).toBeInTheDocument();
-        expect(screen.getByRole('button')).toHaveClass('google-login-btn');
-      });
-    });
-
-    test('should show loading state during authentication', () => {
+    test('should show loading state during authentication', async () => {
       render(<GoogleAuth />);
       
       const loginButton = screen.getByRole('button');
@@ -60,49 +39,41 @@ describe('GoogleAuth Component', () => {
       
       expect(screen.getByText('Loading...')).toBeInTheDocument();
     });
+
+    test('should render Google icon SVG', () => {
+      render(<GoogleAuth />);
+      
+      const svg = document.querySelector('svg.google-icon');
+      expect(svg).toBeInTheDocument();
+      expect(svg).toHaveAttribute('viewBox', '0 0 24 24');
+    });
   });
 
   describe('Authentication Flow', () => {
     test('should initiate Google OAuth flow when login button is clicked', async () => {
-      const mockFederatedSignIn = Auth.federatedSignIn as jest.Mock;
-      mockFederatedSignIn.mockResolvedValue({});
-
       render(<GoogleAuth />);
       
       const loginButton = screen.getByRole('button');
       fireEvent.click(loginButton);
 
       await waitFor(() => {
-        expect(mockFederatedSignIn).toHaveBeenCalledWith('Google');
+        expect(signInWithRedirect).toHaveBeenCalledWith({ provider: 'Google' });
       });
     });
 
     test('should handle successful authentication', async () => {
-      const mockUser = {
-        username: 'test@example.com',
-        attributes: {
-          email: 'test@example.com',
-          name: 'Test User'
-        }
-      };
-
-      (Auth.currentAuthenticatedUser as jest.Mock).mockResolvedValue(mockUser);
-      (Auth.federatedSignIn as jest.Mock).mockResolvedValue(mockUser);
-
       render(<GoogleAuth />);
       
       const loginButton = screen.getByRole('button');
       fireEvent.click(loginButton);
 
       await waitFor(() => {
-        // Component only shows login button, not user profile
-        expect(screen.getByText('Sign in with Google')).toBeInTheDocument();
+        expect(signInWithRedirect).toHaveBeenCalledWith({ provider: 'Google' });
       });
     });
 
     test('should handle authentication errors gracefully', async () => {
-      const mockError = new Error('Authentication failed');
-      (Auth.federatedSignIn as jest.Mock).mockRejectedValue(mockError);
+      (signInWithRedirect as jest.Mock).mockRejectedValue(new Error('Authentication failed'));
 
       render(<GoogleAuth />);
       
@@ -115,48 +86,9 @@ describe('GoogleAuth Component', () => {
     });
   });
 
-  describe('Logout Functionality', () => {
-    test('should show logout button when user is authenticated', async () => {
-      const mockUser = {
-        username: 'test@example.com',
-        attributes: { email: 'test@example.com', name: 'Test User' }
-      };
-
-      (Auth.currentAuthenticatedUser as jest.Mock).mockResolvedValue(mockUser);
-
-      render(<GoogleAuth />);
-      
-      await waitFor(() => {
-        // Component doesn't show logout functionality
-        expect(screen.getByText('Sign in with Google')).toBeInTheDocument();
-      });
-    });
-
-    test('should call signOut when logout button is clicked', async () => {
-      const mockUser = {
-        username: 'test@example.com',
-        attributes: { email: 'test@example.com', name: 'Test User' }
-      };
-
-      (Auth.currentAuthenticatedUser as jest.Mock).mockResolvedValue(mockUser);
-      (Auth.signOut as jest.Mock).mockResolvedValue({});
-
-      render(<GoogleAuth />);
-      
-      await waitFor(() => {
-        // Component doesn't show logout functionality
-        const loginButton = screen.getByText('Sign in with Google');
-        expect(loginButton).toBeInTheDocument();
-      });
-
-      expect(Auth.signOut).toHaveBeenCalled();
-    });
-  });
-
   describe('Error Handling', () => {
     test('should display network error message', async () => {
-      const networkError = new Error('Network error');
-      (Auth.federatedSignIn as jest.Mock).mockRejectedValue(networkError);
+      (signInWithRedirect as jest.Mock).mockRejectedValue(new Error('Network error'));
 
       render(<GoogleAuth />);
       
@@ -169,8 +101,7 @@ describe('GoogleAuth Component', () => {
     });
 
     test('should display user cancelled error message', async () => {
-      const cancelledError = new Error('User cancelled');
-      (Auth.federatedSignIn as jest.Mock).mockRejectedValue(cancelledError);
+      (signInWithRedirect as jest.Mock).mockRejectedValue(new Error('User cancelled'));
 
       render(<GoogleAuth />);
       
@@ -180,6 +111,24 @@ describe('GoogleAuth Component', () => {
       await waitFor(() => {
         expect(screen.getByText('Failed to sign in with Google. Please try again.')).toBeInTheDocument();
       });
+    });
+
+    test('should allow error message to be cleared', async () => {
+      (signInWithRedirect as jest.Mock).mockRejectedValue(new Error('Test error'));
+
+      render(<GoogleAuth />);
+      
+      const loginButton = screen.getByRole('button');
+      fireEvent.click(loginButton);
+
+      await waitFor(() => {
+        expect(screen.getByText('Failed to sign in with Google. Please try again.')).toBeInTheDocument();
+      });
+
+      const closeButton = screen.getByText('×');
+      fireEvent.click(closeButton);
+
+      expect(screen.queryByText('Failed to sign in with Google. Please try again.')).not.toBeInTheDocument();
     });
   });
 
@@ -198,6 +147,15 @@ describe('GoogleAuth Component', () => {
       loginButton.focus();
       
       expect(loginButton).toHaveFocus();
+    });
+
+    test('should show loading spinner during authentication', async () => {
+      render(<GoogleAuth />);
+      
+      const loginButton = screen.getByRole('button');
+      fireEvent.click(loginButton);
+      
+      expect(screen.getByText('Loading...')).toBeInTheDocument();
     });
   });
 }); 
