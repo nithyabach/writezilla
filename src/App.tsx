@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import './App.css';
-import GoogleAuth from './components/auth/FirebaseGoogleAuth';
+import GoogleAuth from './components/auth/GoogleAuth';
+import OAuthCallback from './components/auth/OAuthCallback';
 import { useAuth } from './hooks/useAuth';
 import UserDashboard from './components/UserDashboard';
 import './components/UserDashboard.css';
 import { signUp, signIn, signOut, getCurrentUser, confirmSignUp, resendSignUpCode } from 'aws-amplify/auth';
 
-function App() {
+// Landing Page Component
+const LandingPage: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
   const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
   const [signupForm, setSignupForm] = useState({
@@ -48,17 +51,7 @@ function App() {
     }
   };
 
-  // Handle Google sign-in
-  const handleGoogleSignIn = (user: any) => {
-    setGoogleUser(user);
-    setCurrentUser(user); // Set as current user to show dashboard
-  };
 
-  // Handle Google sign-out
-  const handleGoogleSignOut = () => {
-    setGoogleUser(null);
-    setCurrentUser(null);
-  };
 
   // Handle sign-out from UserDashboard
   const handleSignOut = () => {
@@ -389,10 +382,7 @@ function App() {
                     </div>
 
                                                  <div className="social-login">
-                               <GoogleAuth 
-                                 onGoogleSignIn={handleGoogleSignIn}
-                                 onGoogleSignOut={handleGoogleSignOut}
-                               />
+                               <GoogleAuth />
                              </div>
                            </form>
                          ) : (
@@ -473,10 +463,7 @@ function App() {
                     </div>
 
                                                  <div className="social-login">
-                               <GoogleAuth 
-                                 onGoogleSignIn={handleGoogleSignIn}
-                                 onGoogleSignOut={handleGoogleSignOut}
-                               />
+                               <GoogleAuth />
                              </div>
                            </form>
                          )}
@@ -622,6 +609,64 @@ function App() {
         </div>
       </footer>
     </div>
+  );
+};
+
+// Main App Component with Routing
+function App() {
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
+
+  // Check authentication status on component mount
+  useEffect(() => {
+    checkAuthStatus();
+  }, []);
+
+  const checkAuthStatus = async () => {
+    try {
+      const user = await getCurrentUser();
+      setCurrentUser(user);
+    } catch (error) {
+      // User is not authenticated
+      setCurrentUser(null);
+    } finally {
+      setIsLoadingAuth(false);
+    }
+  };
+
+  // Handle sign-out from UserDashboard
+  const handleSignOut = () => {
+    console.log('App.tsx handleSignOut called');
+    setCurrentUser(null);
+    console.log('App.tsx state cleared');
+  };
+
+  if (isLoadingAuth) {
+    return (
+      <div className="loading-screen">
+        <div className="loading-spinner"></div>
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  return (
+    <Routes>
+      {/* OAuth Callback Route */}
+      <Route path="/oauth/callback" element={<OAuthCallback />} />
+      
+      {/* Main App Routes */}
+      <Route 
+        path="/" 
+        element={
+          currentUser ? (
+            <UserDashboard onSignOut={handleSignOut} />
+          ) : (
+            <LandingPage />
+          )
+        } 
+      />
+    </Routes>
   );
 }
 

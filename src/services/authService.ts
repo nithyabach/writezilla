@@ -1,5 +1,6 @@
 import { 
   signInWithRedirect, 
+  signIn,
   signUp, 
   signOut, 
   getCurrentUser, 
@@ -45,8 +46,7 @@ export class AuthService {
       });
 
       return {
-        userId: result.user.userId,
-        userSub: result.userSub || 'temp-user-sub',
+        userId: result.userId,
         isSignUpComplete: result.isSignUpComplete
       };
     } catch (error: any) {
@@ -92,7 +92,7 @@ export class AuthService {
    */
   async signIn(credentials: LoginCredentials): Promise<UserProfile> {
     try {
-      await signInWithRedirect({
+      await signIn({
         username: credentials.email,
         password: credentials.password
       });

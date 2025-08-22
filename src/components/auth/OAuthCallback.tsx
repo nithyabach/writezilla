@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { fetchAuthSession, getCurrentUser } from 'aws-amplify/auth';
+import { getCurrentUser, fetchUserAttributes } from 'aws-amplify/auth';
 import { useNavigate } from 'react-router-dom';
 
 const OAuthCallback: React.FC = () => {
@@ -10,19 +10,19 @@ const OAuthCallback: React.FC = () => {
   useEffect(() => {
     const handleOAuthCallback = async () => {
       try {
-        // Check if we have a valid session after OAuth redirect
-        const session = await fetchAuthSession();
+        // Check if we have a valid user after OAuth redirect
+        const user = await getCurrentUser();
         
-        if (session.tokens) {
+        if (user) {
           // Successfully authenticated
           console.log('OAuth authentication successful');
-          
-          // Get current user details
-          const user = await getCurrentUser();
           console.log('Authenticated user:', user);
           
-          // Redirect to dashboard or home page
-          navigate('/dashboard', { replace: true });
+          // Skip fetchUserAttributes for now to avoid scope issues
+          // TODO: Fix scope configuration for user attributes
+          
+          // Redirect to home page
+          navigate('/', { replace: true });
         } else {
           setError('Authentication failed. Please try again.');
         }
